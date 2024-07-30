@@ -1,30 +1,60 @@
 package com.network.network.user;
 
 import jakarta.annotation.Resource;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 @RestController
+@RequestMapping("/users")
+@CrossOrigin("*")
 public class UserController {
     @Resource
     private UserService userService;
 
-    @GetMapping("/users")
+    @Resource
+    private UserResourceAssembler userResourceAssembler;
+
+    @GetMapping("")
     public ResponseEntity<?> getUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
+        List<User> users = userService.getAllUsers();
+
+        return ResponseEntity.ok(userResourceAssembler.toCollectionModel(users));
     }
 
-    @GetMapping("/users/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<?> getUser(@PathVariable int id) {
-        return ResponseEntity.ok(userService.getUser(id));
+        User user = userService.getUser(id);
+
+        if (user == null) {
+            throw new UserNotFoundException(id);
+        }
+
+        return ResponseEntity.ok(userResourceAssembler.toModel(user));
     }
 
-//    @PostMapping("/users")
-//    public User createUser(@RequestBody User newUser) {
-//        User user = userRepository.
-//
-//        return userRepository.save(user);
-//    }
+    @PostMapping("")
+    public ResponseEntity<?> createUser(@RequestBody User user) {
+        if (userService.userExistsByEmail(user.getEmail())) {
+            throw new DuplicateEmailException(user.getEmail());
+        }
+
+        User newUser = userService.saveUser(user);
+        EntityModel<User> userModel = userResourceAssembler.toModel(newUser);
+
+        return ResponseEntity
+                .created(userModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
+                .body(userModel);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable int id) {
+        userService.deleteUser(id);
+
+        return ResponseEntity.ok(Map.of("message", "User " + id + " has been deleted"));
+    }
 }

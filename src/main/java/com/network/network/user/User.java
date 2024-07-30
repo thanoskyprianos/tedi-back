@@ -1,13 +1,17 @@
 package com.network.network.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.network.network.media.Media;
+import com.network.network.role.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Getter @Setter
+@ToString
 @NoArgsConstructor
 public class User {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,19 +27,9 @@ public class User {
 
     private String phoneNumber;
 
-    @OneToOne
-    private Media imagePath;
+    @OneToOne(cascade=CascadeType.REMOVE)
+    private Media avatar;
 
-    @Enumerated(EnumType.STRING)
+    @ManyToOne @JsonIgnoreProperties("users")
     private Role role;
-
-    public User(String firstName, String lastName, String email, String password, String phoneNumber, Media imagePath, Role role) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.password = password;
-        this.phoneNumber = phoneNumber;
-        this.imagePath = imagePath;
-        this.role = role;
-    }
 }

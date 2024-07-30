@@ -1,12 +1,12 @@
 package com.network.network.media;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.io.File;
 
 @Entity
 @Getter @Setter
@@ -15,9 +15,21 @@ public class Media {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @JsonIgnore
     private String path;
 
-    public Media(String path) {
+    private String contentType;
+
+    public Media(String path, String contentType) {
         this.path = path;
+        this.contentType = contentType;
+    }
+
+    @PostRemove
+    public void removeMedia() {
+        File file = new File(this.path);
+        if (file.exists()) {
+            file.delete();
+        }
     }
 }

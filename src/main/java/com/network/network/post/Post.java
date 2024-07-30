@@ -19,6 +19,7 @@ public class Post {
     private String text;
 
     @OneToMany
+    @JoinTable(name = "post_media")
     private List<Media> mediaPaths;
 
     public Post(String text) {
