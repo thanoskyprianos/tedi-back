@@ -25,6 +25,13 @@ public class Media {
         this.contentType = contentType;
     }
 
+    public void replaceMedia(String newPath, String newContentType) {
+        removeMedia(); // delete old media
+
+        this.path = newPath;
+        this.contentType = newContentType;
+    }
+
     @PostRemove
     public void removeMedia() {
         File file = new File(this.path);

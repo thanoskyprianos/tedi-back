@@ -28,7 +28,7 @@ public class MediaService {
         return mediaRepository.findById(id).orElse(null);
     }
 
-    public Media saveFile(MultipartFile file) {
+    private Media saveSingle(MultipartFile file) {
         if (file.isEmpty()) {
             throw new EmptyMediaException();
         }
@@ -52,8 +52,11 @@ public class MediaService {
             throw new MediaSavingException(file.getOriginalFilename());
         }
 
-        Media media = new Media(filePath.toString(), file.getContentType());
-        return mediaRepository.save(media);
+        return new Media(filePath.toString(), file.getContentType());
+    }
+
+    public Media saveFile(MultipartFile file) {
+        return mediaRepository.save(saveSingle(file));
     }
 
     @Transactional
@@ -66,4 +69,21 @@ public class MediaService {
 
         return mediaList;
     }
+
+    public Media updateFile(int id, MultipartFile file) {
+        Media media = mediaRepository.findById(id).orElseThrow(() -> new MediaNotFoundException(id));
+        Media newFile = saveSingle(file);
+
+        media.replaceMedia(newFile.getPath(), newFile.getContentType());
+
+        return mediaRepository.save(media);
+    }
+
+    public void deleteFile(int id) {
+        mediaRepository.findById(id).ifPresent(
+                media -> mediaRepository.delete(media)
+        );
+    }
+
+
 }
