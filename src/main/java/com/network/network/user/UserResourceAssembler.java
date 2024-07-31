@@ -13,9 +13,9 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class UserResourceAssembler implements RepresentationModelAssembler<User, EntityModel<User>> {
 
     @Override @NonNull
-    public EntityModel<User> toModel(@NonNull User user) {
-        return EntityModel.of(user,
-                linkTo(methodOn(UserController.class).getUser(user.getId())).withSelfRel()
+    public EntityModel<User> toModel(@NonNull User entity) {
+        return EntityModel.of(entity,
+                linkTo(methodOn(UserController.class).getUser(entity.getId())).withSelfRel()
         );
     }
 

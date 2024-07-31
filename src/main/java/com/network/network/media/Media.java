@@ -5,8 +5,10 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.io.File;
+import java.util.Date;
 
 @Entity
 @Getter @Setter
@@ -19,6 +21,11 @@ public class Media {
     private String path;
 
     private String contentType;
+
+    @UpdateTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "last_update")
+    private Date date; // can use it for deleting orphans
 
     public Media(String path, String contentType) {
         this.path = path;
