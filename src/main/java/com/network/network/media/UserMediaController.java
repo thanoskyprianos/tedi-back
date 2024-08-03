@@ -1,11 +1,15 @@
 package com.network.network.media;
 
+import com.network.network.media.resource.MediaResourceAssembler;
+import com.network.network.media.service.MediaService;
+import com.network.network.user.service.UserService;
 import jakarta.annotation.Resource;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,20 +17,23 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/media")
 @CrossOrigin("*")
-public class MediaController {
+@RequestMapping("user/{userId}/media")
+//@PreAuthorize("#userId == principal.getId()")
+public class UserMediaController {
     @Resource
     private MediaService mediaService;
 
     @Resource
+    private UserService userService;
+
+    @Resource
     private MediaResourceAssembler mediaResourceAssembler;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getMedia(@PathVariable int id) {
-        Media media = mediaService.getMedia(id);
-
-        return ResponseEntity.ok(mediaResourceAssembler.toModel(media));
+    @GetMapping("/avatar")
+    public ResponseEntity<?> getUserAvatar(@PathVariable int userId) {
+        return ResponseEntity.ok(mediaService.fetchMedia(
+                userService.getUserById(userId).getAvatar()));
     }
 
     @PostMapping("/upload/single")

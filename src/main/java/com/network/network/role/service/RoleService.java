@@ -1,5 +1,7 @@
-package com.network.network.role;
+package com.network.network.role.service;
 
+import com.network.network.role.Role;
+import com.network.network.role.resource.RoleRepository;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 

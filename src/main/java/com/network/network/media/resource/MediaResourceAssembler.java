@@ -1,5 +1,7 @@
-package com.network.network.media;
+package com.network.network.media.resource;
 
+import com.network.network.media.Media;
+import com.network.network.media.UserMediaController;
 import lombok.NonNull;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -15,9 +17,9 @@ public class MediaResourceAssembler implements RepresentationModelAssembler<Medi
     @Override @NonNull
     public EntityModel<Media> toModel(@NonNull Media entity) {
         return EntityModel.of(entity,
-                linkTo(methodOn(MediaController.class).getMedia(entity.getId())).withSelfRel(),
-                linkTo(methodOn(MediaController.class).updateFile(entity.getId(), null)).withRel("update"),
-                linkTo(methodOn(MediaController.class).deleteFile(entity.getId())).withRel("delete")
+//                linkTo(methodOn(UserMediaController.class).getMedia(entity.getId())).withSelfRel(),
+                linkTo(methodOn(UserMediaController.class).updateFile(entity.getId(), null)).withRel("update"),
+                linkTo(methodOn(UserMediaController.class).deleteFile(entity.getId())).withRel("delete")
         );
     }
 

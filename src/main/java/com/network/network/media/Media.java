@@ -25,6 +25,7 @@ public class Media {
     @UpdateTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_update")
+    @JsonIgnore
     private Date date; // can use it for deleting orphans
 
     public Media(String path, String contentType) {

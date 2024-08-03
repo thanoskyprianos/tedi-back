@@ -1,4 +1,4 @@
-package com.network.network.user;
+package com.network.network.user.exception;
 
 import lombok.Getter;
 

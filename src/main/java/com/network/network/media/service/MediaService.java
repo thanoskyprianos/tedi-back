@@ -1,12 +1,21 @@
-package com.network.network.media;
+package com.network.network.media.service;
 
+import com.network.network.media.Media;
+import com.network.network.media.exception.EmptyMediaException;
+import com.network.network.media.exception.MediaNotFoundException;
+import com.network.network.media.exception.MediaSavingException;
+import com.network.network.media.resource.MediaRepository;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -55,6 +64,14 @@ public class MediaService {
         return new Media(filePath.toString(), file.getContentType());
     }
 
+    public Object fetchMedia(Media media) {
+        try {
+            return new UrlResource(new URI(media.getPath()));
+        } catch (URISyntaxException | MalformedURLException e) {
+            throw new MediaNotFoundException(media.getId());
+        }
+    }
+
     public Media saveFile(MultipartFile file) {
         return mediaRepository.save(saveSingle(file));
     }
@@ -84,6 +101,4 @@ public class MediaService {
                 media -> mediaRepository.delete(media)
         );
     }
-
-
 }

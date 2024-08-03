@@ -1,4 +1,4 @@
-package com.network.network.media;
+package com.network.network.media.exception;
 
 import lombok.Getter;
 

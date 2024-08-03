@@ -1,4 +1,4 @@
-package com.network.network.role;
+package com.network.network.role.exception;
 
 import lombok.Getter;
 

@@ -1,5 +1,6 @@
-package com.network.network.role;
+package com.network.network.role.resource;
 
+import com.network.network.role.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

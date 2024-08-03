@@ -1,13 +1,11 @@
-package com.network.network.user;
+package com.network.network.user.exception;
 
-import lombok.Getter;
-
-@Getter
 public class UserNotFoundException extends RuntimeException {
-    private final int id;
-
     public UserNotFoundException(int id) {
         super("User with id " + id + " not found");
-        this.id = id;
+    }
+
+    public UserNotFoundException(String email) {
+        super("User with email " + email + " not found");
     }
 }

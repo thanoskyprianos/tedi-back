@@ -1,5 +1,8 @@
-package com.network.network.user;
+package com.network.network.user.resource;
 
+import com.network.network.media.UserMediaController;
+import com.network.network.user.User;
+import com.network.network.user.UserController;
 import lombok.NonNull;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -15,7 +18,8 @@ public class UserResourceAssembler implements RepresentationModelAssembler<User,
     @Override @NonNull
     public EntityModel<User> toModel(@NonNull User entity) {
         return EntityModel.of(entity,
-                linkTo(methodOn(UserController.class).getUser(entity.getId())).withSelfRel()
+                linkTo(methodOn(UserController.class).getUser(entity.getId())).withSelfRel(),
+                linkTo(methodOn(UserMediaController.class).getUserAvatar(entity.getId())).withRel("avatar")
         );
     }
 

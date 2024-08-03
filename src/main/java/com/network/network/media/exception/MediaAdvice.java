@@ -1,4 +1,4 @@
-package com.network.network.media;
+package com.network.network.media.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

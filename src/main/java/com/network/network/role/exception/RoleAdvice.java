@@ -1,4 +1,4 @@
-package com.network.network.role;
+package com.network.network.role.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
