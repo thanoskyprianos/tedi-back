@@ -4,6 +4,8 @@ import com.network.network.user.repr.LoginRequest;
 import com.network.network.user.exception.DuplicateEmailException;
 import com.network.network.user.exception.UserNotFoundException;
 import com.network.network.user.repr.RegisterRequest;
+import com.network.network.user.repr.UserRepr;
+import com.network.network.user.resource.UserRepository;
 import com.network.network.user.resource.UserResourceAssembler;
 import com.network.network.user.service.UserService;
 import jakarta.annotation.Resource;
@@ -26,22 +28,19 @@ public class UserController {
     @Resource
     private UserResourceAssembler userResourceAssembler;
 
-    @GetMapping("") @PreAuthorize("hasRole('ADMIN')")
+    @Resource
+    private UserRepository userRepository;
+
+    @GetMapping("")
     public ResponseEntity<?> getUsers() {
         List<User> users = userService.getAllUsers();
 
         return ResponseEntity.ok(userResourceAssembler.toCollectionModel(users));
     }
 
-    @GetMapping("/{id}") @PreAuthorize("#id == principal.getId()")
-    public ResponseEntity<?> getUser(@PathVariable int id) {
-        User user = userService.getUserById(id);
-
-        if (user == null) {
-            throw new UserNotFoundException(id);
-        }
-
-        return ResponseEntity.ok(userResourceAssembler.toModel(user));
+    @GetMapping("/like")
+    public List<User> likeUser(@RequestParam String fullName) {
+        return userRepository.findByNameLike(fullName);
     }
 
     @PostMapping("/login")
@@ -58,11 +57,22 @@ public class UserController {
         User user = new User(registerRequest);
         user = userService.saveUser(user);
 
-        EntityModel<User> userModel = userResourceAssembler.toModel(user);
+        EntityModel<UserRepr> userModel = userResourceAssembler.toModel(user);
 
         return ResponseEntity
                 .created(userModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
                 .body(userModel);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getUser(@PathVariable int id) {
+        User user = userService.getUserById(id);
+
+        if (user == null) {
+            throw new UserNotFoundException(id);
+        }
+
+        return ResponseEntity.ok(userResourceAssembler.toModel(user));
     }
 
     @DeleteMapping("/{id}") @PreAuthorize("#id == principal.getId()")

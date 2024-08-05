@@ -1,23 +1,36 @@
 package com.network.network.security.jwt;
 
-import io.jsonwebtoken.JwtException;
+import com.network.network.user.User;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.Optional;
 
 @Component
 public class JwtUtil {
+    @Resource
+    JwtTokenRepository tokenRepository;
+
     @Value("${jwt.token.secret}")
     private String secret;
 
     @Value("${jwt.token.expirationMs}")
     private long expirationMs;
+
+    public void invalidateAllTokens(User user) {
+        user.getJwtTokens().forEach(jwtToken -> {
+            jwtToken.setInvalid(true);
+            tokenRepository.save(jwtToken);
+        });
+    }
 
     public String extractToken(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
@@ -47,12 +60,42 @@ public class JwtUtil {
                 .getSubject();
     }
 
+    public long extractExpiration(String token) {
+        return Jwts.parser()
+                .verifyWith(secretKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getExpiration()
+                .getTime();
+    }
+
     // could change
     public boolean validateToken(String token) {
+        Optional<JwtToken> jwtToken = tokenRepository.findById(token);
+        JwtToken jwtTokenObj = null;
+
         try {
-            Jwts.parser().verifyWith(secretKey());
-        } catch (Exception e) {
-            throw new JwtException(e.getMessage());
+            if (jwtToken.isEmpty()) {
+                throw new Exception("Invalid token");
+            }
+
+            jwtTokenObj = jwtToken.get();
+
+            if (jwtToken.get().isInvalid()) {
+                throw new Exception("Token is invalid");
+            }
+
+            Jwts.parser().verifyWith(secretKey()).build().parseSignedClaims(token);
+        }
+        catch (ExpiredJwtException e) {
+            jwtTokenObj.setInvalid(true);
+            tokenRepository.save(jwtTokenObj);
+            return false;
+        }
+        catch (Exception e) {
+            System.out.println(e.getMessage());
+            return false;
         }
 
         return true;

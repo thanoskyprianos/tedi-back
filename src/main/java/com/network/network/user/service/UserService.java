@@ -4,13 +4,17 @@ import com.network.network.media.service.MediaService;
 import com.network.network.role.Role;
 import com.network.network.role.exception.RoleNotFoundException;
 import com.network.network.role.service.RoleService;
+import com.network.network.security.jwt.JwtToken;
+import com.network.network.security.jwt.JwtTokenRepository;
 import com.network.network.security.jwt.JwtUtil;
+import com.network.network.security.repr.JwtRepr;
 import com.network.network.user.User;
 import com.network.network.user.exception.LoginException;
 import com.network.network.user.exception.UserNotFoundException;
 import com.network.network.user.repr.LoginRequest;
 import com.network.network.user.repr.LoginResponse;
 import com.network.network.user.resource.UserRepository;
+import com.network.network.user.resource.UserResourceAssembler;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,6 +30,8 @@ import java.util.List;
 public class UserService {
     @Resource UserRepository userRepository;
 
+    @Resource UserResourceAssembler userResourceAssembler;
+
     @Resource MediaService mediaService;
 
     @Resource RoleService roleService;
@@ -35,6 +41,8 @@ public class UserService {
     @Resource AuthenticationManager authenticationManager;
 
     @Resource PasswordEncoder passwordEncoder;
+
+    @Resource JwtTokenRepository jwtTokenRepository;
 
     @Value("${roles.names.admin}")
     String adminName;
@@ -70,9 +78,17 @@ public class UserService {
         User user = userRepository.findByEmail(loginRequest.getEmail()).orElseThrow(()
                 -> new UserNotFoundException(loginRequest.getEmail()));
 
+        jwtUtil.invalidateAllTokens(user);
         String token = jwtUtil.generateToken(user.getEmail());
+        JwtToken jwtToken = new JwtToken();
 
-        return new LoginResponse(user, token);
+        jwtToken.setToken(token);
+        jwtToken.setUser(user);
+        user.addToken(jwtToken);
+
+        jwtTokenRepository.save(jwtToken);
+
+        return new LoginResponse(userResourceAssembler.toModel(user), new JwtRepr(token, jwtUtil.extractExpiration(token)));
     }
 
     @Transactional

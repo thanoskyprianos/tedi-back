@@ -13,9 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -64,10 +61,12 @@ public class MediaService {
         return new Media(filePath.toString(), file.getContentType());
     }
 
-    public Object fetchMedia(Media media) {
+    public UrlResource fetchMedia(Media media) {
+        Path file = Path.of(media.getPath());
+
         try {
-            return new UrlResource(new URI(media.getPath()));
-        } catch (URISyntaxException | MalformedURLException e) {
+            return new UrlResource(file.toUri());
+        } catch (Exception e) {
             throw new MediaNotFoundException(media.getId());
         }
     }

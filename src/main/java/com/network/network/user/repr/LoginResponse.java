@@ -1,12 +1,13 @@
 package com.network.network.user.repr;
 
-import com.network.network.user.User;
+import com.network.network.security.repr.JwtRepr;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.hateoas.EntityModel;
 
 @Getter @Setter @AllArgsConstructor
 public class LoginResponse {
-    User user;
-    String jwt;
+    EntityModel<UserRepr> user;
+    JwtRepr jwt;
 }

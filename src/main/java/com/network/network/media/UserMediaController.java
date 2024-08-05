@@ -2,71 +2,55 @@ package com.network.network.media;
 
 import com.network.network.media.resource.MediaResourceAssembler;
 import com.network.network.media.service.MediaService;
+import com.network.network.user.User;
 import com.network.network.user.service.UserService;
 import jakarta.annotation.Resource;
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.IanaLinkRelations;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-import java.util.Map;
-
 @RestController
 @CrossOrigin("*")
-@RequestMapping("user/{userId}/media")
-//@PreAuthorize("#userId == principal.getId()")
+@RequestMapping("user/{userId}/media/avatar")
+@PreAuthorize("#userId == principal.getId()")
 public class UserMediaController {
-    @Resource
-    private MediaService mediaService;
+    @Resource private MediaService mediaService;
 
-    @Resource
-    private UserService userService;
+    @Resource private UserService userService;
 
-    @Resource
-    private MediaResourceAssembler mediaResourceAssembler;
-
-    @GetMapping("/avatar")
+    @GetMapping("")
     public ResponseEntity<?> getUserAvatar(@PathVariable int userId) {
-        return ResponseEntity.ok(mediaService.fetchMedia(
-                userService.getUserById(userId).getAvatar()));
-    }
+        User user = userService.getUserById(userId);
+        Media media = user.getAvatar();
 
-    @PostMapping("/upload/single")
-    public ResponseEntity<?> saveFile(@RequestParam MultipartFile media) {
-        Media mediaSaved = mediaService.saveFile(media);
-        EntityModel<Media> entityModel = mediaResourceAssembler.toModel(mediaSaved);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", media.getContentType());
 
         return ResponseEntity
-                .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
-                .body(entityModel);
+                .ok()
+                .headers(headers)
+                .body(mediaService.fetchMedia(media));
     }
 
-    @PostMapping("/upload/multiple")
-    public ResponseEntity<?> saveFile(@RequestParam List<MultipartFile> media) {
-        List<Media> mediaSaved = mediaService.saveFiles(media);
-        CollectionModel<EntityModel<Media>> entityModel = mediaResourceAssembler.toCollectionModel(mediaSaved);
+    @PostMapping("/upload")
+    public ResponseEntity<?> uploadUserAvatar(@PathVariable int userId, @RequestParam MultipartFile file) {
+        Media media = mediaService.saveFile(file);
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(entityModel);
+        User user = userService.getUserById(userId);
+        user.setAvatar(media);
+
+        userService.saveUser(user);
+
+        return ResponseEntity.ok(media);
     }
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<?> updateFile(@PathVariable int id, @RequestParam MultipartFile media) {
-        return ResponseEntity
-                .ok(mediaResourceAssembler
-                        .toModel(mediaService.updateFile(id, media)));
-    }
+    @PutMapping("/update")
+    public ResponseEntity<?> updateUserAvatar(@PathVariable int userId, @RequestParam MultipartFile file) {
+        Media media = userService.getUserById(userId).getAvatar();
+        media = mediaService.updateFile(media.getId(), file);
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteFile(@PathVariable int id) {
-        mediaService.deleteFile(id);
-
-        return ResponseEntity.ok(Map.of("message", "Image " + id + " deleted"));
+        return ResponseEntity.ok(media);
     }
 }
