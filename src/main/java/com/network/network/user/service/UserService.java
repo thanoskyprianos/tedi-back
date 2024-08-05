@@ -32,8 +32,6 @@ public class UserService {
 
     @Resource UserResourceAssembler userResourceAssembler;
 
-    @Resource MediaService mediaService;
-
     @Resource RoleService roleService;
 
     @Resource JwtUtil jwtUtil;
@@ -51,11 +49,11 @@ public class UserService {
     String professionalName;
 
     public User getUserById(int id) {
-        return userRepository.findById(id).orElse(null);
+        return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
     }
 
     public User getUserByEmail(String email) {
-        return userRepository.findByEmail(email).orElse(null);
+        return userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
     }
 
     public List<User> getAllUsers() {
@@ -101,6 +99,10 @@ public class UserService {
 
         user.setPassword(passwordEncoder.encode(user.getPassword())); // BCrypt encoding
 
+        return userRepository.save(user);
+    }
+
+    public User updateUser(User user) {
         return userRepository.save(user);
     }
 

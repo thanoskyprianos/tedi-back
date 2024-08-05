@@ -1,6 +1,8 @@
 package com.network.network.post;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.network.network.media.Media;
+import com.network.network.user.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,22 +20,17 @@ public class Post {
 
     private String text;
 
-    @OneToMany
+    @JsonIgnore
     @JoinTable(name = "post_media")
-    private List<Media> mediaPaths;
+    @OneToMany(cascade = CascadeType.REMOVE)
+    private List<Media> mediaList = new ArrayList<>();
 
-    public Post(String text) {
-        this.text = text;
+    @ManyToOne @JsonIgnore
+    private User user;
 
-        this.mediaPaths = new ArrayList<>();
-    }
-
-//    public Post(String text, List<Media> mediaPaths) {
-//        this.text = text;
-//        this.mediaPaths = mediaPaths;
-//    }
+    public Post(String text) { this.text = text; }
 
     public void addMedia(Media media) {
-        mediaPaths.add(media);
+        mediaList.add(media);
     }
 }

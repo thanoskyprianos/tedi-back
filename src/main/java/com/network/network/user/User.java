@@ -3,6 +3,7 @@ package com.network.network.user;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.network.network.media.Media;
+import com.network.network.post.Post;
 import com.network.network.role.Role;
 import com.network.network.security.jwt.JwtToken;
 import com.network.network.user.repr.RegisterRequest;
@@ -35,8 +36,16 @@ public class User {
     @JsonIgnore
     private Media avatar;
 
+    @OneToOne(cascade=CascadeType.REMOVE)
+    @JsonIgnore
+    private Media cv;
+
     @ManyToOne @JsonIgnoreProperties("users")
     private Role role;
+
+    @JsonIgnore
+    @OneToMany(cascade=CascadeType.REMOVE, mappedBy = "user")
+    private List<Post> posts;
 
     @OneToMany(mappedBy = "user")
     @JsonIgnore
@@ -52,5 +61,9 @@ public class User {
 
     public void addToken(JwtToken jwtToken) {
         jwtTokens.add(jwtToken);
+    }
+
+    public void addPost(Post post) {
+        posts.add(post);
     }
 }

@@ -2,7 +2,6 @@ package com.network.network.user;
 
 import com.network.network.user.repr.LoginRequest;
 import com.network.network.user.exception.DuplicateEmailException;
-import com.network.network.user.exception.UserNotFoundException;
 import com.network.network.user.repr.RegisterRequest;
 import com.network.network.user.repr.UserRepr;
 import com.network.network.user.resource.UserRepository;
@@ -50,7 +49,7 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
-        if (userService.getUserByEmail(registerRequest.getEmail()) != null) {
+        if (userService.userExistsByEmail(registerRequest.getEmail())) {
             throw new DuplicateEmailException(registerRequest.getEmail());
         }
 
@@ -68,14 +67,11 @@ public class UserController {
     public ResponseEntity<?> getUser(@PathVariable int id) {
         User user = userService.getUserById(id);
 
-        if (user == null) {
-            throw new UserNotFoundException(id);
-        }
-
         return ResponseEntity.ok(userResourceAssembler.toModel(user));
     }
 
-    @DeleteMapping("/{id}") @PreAuthorize("#id == principal.getId()")
+    @DeleteMapping("/{id}")
+    @PreAuthorize("#id == principal.getId() || hasRole('ADMIN')")
     public ResponseEntity<?> deleteUser(@PathVariable int id) {
         userService.deleteUser(id);
 
