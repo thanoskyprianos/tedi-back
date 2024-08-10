@@ -36,6 +36,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return;
         }
 
+        setContext(request, token);
+
+        filterChain.doFilter(request, response);
+    }
+
+    public void setContext(HttpServletRequest request, String token) {
         UserDetails userDetails = userDetailsService
                 .loadUserByUsername(jwtUtil.extractUsername(token));
 
@@ -45,7 +51,5 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         authenticationToken.setDetails(new WebAuthenticationDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-
-        filterChain.doFilter(request, response);
     }
 }

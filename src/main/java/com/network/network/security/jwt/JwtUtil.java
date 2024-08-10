@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
-import java.util.Optional;
 
 @Component
 public class JwtUtil {
@@ -70,27 +69,29 @@ public class JwtUtil {
                 .getTime();
     }
 
-    // could change
     public boolean validateToken(String token) {
-        Optional<JwtToken> jwtToken = tokenRepository.findById(token);
-        JwtToken jwtTokenObj = null;
+        JwtToken jwtToken;
+        try {
+            jwtToken = tokenRepository
+                    .findById(token)
+                    .orElseThrow(() -> new Exception("Token not found"));
+        }
+        catch (Exception e) {
+            return false;
+        }
 
         try {
-            if (jwtToken.isEmpty()) {
+            if (jwtToken.isInvalid()) {
                 throw new Exception("Invalid token");
-            }
-
-            jwtTokenObj = jwtToken.get();
-
-            if (jwtToken.get().isInvalid()) {
-                throw new Exception("Token is invalid");
             }
 
             Jwts.parser().verifyWith(secretKey()).build().parseSignedClaims(token);
         }
         catch (ExpiredJwtException e) {
-            jwtTokenObj.setInvalid(true);
-            tokenRepository.save(jwtTokenObj);
+            jwtToken.setInvalid(true);
+            tokenRepository.save(jwtToken);
+
+            System.out.println("Expired token");
             return false;
         }
         catch (Exception e) {

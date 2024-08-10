@@ -12,7 +12,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -35,6 +34,7 @@ public class SecurityConfig {
             requests.requestMatchers("users/login").permitAll();
             requests.requestMatchers("users/register").permitAll();
             requests.requestMatchers("users/logout").permitAll();
+            requests.requestMatchers("users/logout/success").permitAll();
             requests.anyRequest().authenticated();
         });
 
@@ -48,10 +48,12 @@ public class SecurityConfig {
 
         http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
+        http.exceptionHandling((exc) -> exc.authenticationEntryPoint(new AuthEntryPoint()));
+
         http.logout((logout) -> {
             logout.logoutUrl("/users/logout");
+            logout.logoutSuccessUrl("/users/logout/success");
             logout.addLogoutHandler(logoutHandler);
-            logout.logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext());
         });
 
         return http.build();

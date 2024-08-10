@@ -4,7 +4,6 @@ import com.network.network.media.service.MediaService;
 import com.network.network.user.User;
 import com.network.network.user.service.UserService;
 import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -14,7 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @CrossOrigin("*")
 @RequestMapping("user/{userId}/media")
-@PreAuthorize("#userId == principal.getId()")
 public class UserMediaController {
     @Resource private MediaService mediaService;
 
@@ -24,6 +22,10 @@ public class UserMediaController {
     public ResponseEntity<?> getUserAvatar(@PathVariable int userId) {
         User user = userService.getUserById(userId);
         Media media = user.getAvatar();
+
+        if (media == null) {
+            return ResponseEntity.noContent().build();
+        }
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type", media.getContentType());
@@ -39,6 +41,10 @@ public class UserMediaController {
         User user = userService.getUserById(userId);
         Media media = user.getCv();
 
+        if (media == null) {
+            return ResponseEntity.noContent().build();
+        }
+
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type", media.getContentType());
 
@@ -48,7 +54,7 @@ public class UserMediaController {
                 .body(mediaService.fetchMedia(media));
     }
 
-    @PostMapping("/avatar")
+    @PostMapping("/avatar") @PreAuthorize("#userId == principal.getId()")
     public ResponseEntity<?> uploadUserAvatar(@PathVariable int userId, @RequestParam MultipartFile file) {
         Media media = mediaService.saveFile(file);
 
@@ -60,7 +66,7 @@ public class UserMediaController {
         return ResponseEntity.ok(media);
     }
 
-    @PostMapping("/cv")
+    @PostMapping("/cv") @PreAuthorize("#userId == principal.getId()")
     public ResponseEntity<?> uploadUserCV(@PathVariable int userId, @RequestParam MultipartFile file) {
         Media media = mediaService.saveFile(file);
 
@@ -72,7 +78,7 @@ public class UserMediaController {
         return ResponseEntity.ok(media);
     }
 
-    @PutMapping("/avatar")
+    @PutMapping("/avatar") @PreAuthorize("#userId == principal.getId()")
     public ResponseEntity<?> updateUserAvatar(@PathVariable int userId, @RequestParam MultipartFile file) {
         Media media = userService.getUserById(userId).getAvatar();
         media = mediaService.updateFile(media.getId(), file);
@@ -80,7 +86,7 @@ public class UserMediaController {
         return ResponseEntity.ok(media);
     }
 
-    @PutMapping("/cv")
+    @PutMapping("/cv") @PreAuthorize("#userId == principal.getId()")
     public ResponseEntity<?> updateUserCV(@PathVariable int userId, @RequestParam MultipartFile file) {
         Media media = userService.getUserById(userId).getCv();
         media = mediaService.updateFile(media.getId(), file);

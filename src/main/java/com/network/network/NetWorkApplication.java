@@ -23,15 +23,15 @@ public class NetWorkApplication {
         SpringApplication.run(NetWorkApplication.class, args);
     }
 
-    @PostConstruct
-    public void init() {
-        Role admin = new Role();
-        admin.setName(adminName);
-
-        Role professional = new Role();
-        professional.setName(professionalName);
-
-        roleRepository.save(admin);
-        roleRepository.save(professional);
-    }
+//    @PostConstruct
+//    public void init() {
+//        Role admin = new Role();
+//        admin.setName(adminName);
+//
+//        Role professional = new Role();
+//        professional.setName(professionalName);
+//
+//        roleRepository.save(admin);
+//        roleRepository.save(professional);
+//    }
 }

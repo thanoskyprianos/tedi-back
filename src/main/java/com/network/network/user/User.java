@@ -2,6 +2,7 @@ package com.network.network.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.network.network.comment.Comment;
 import com.network.network.media.Media;
 import com.network.network.post.Post;
 import com.network.network.role.Role;
@@ -13,6 +14,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter @Setter
@@ -36,19 +38,27 @@ public class User {
     @JsonIgnore
     private Media avatar;
 
-    @OneToOne(cascade=CascadeType.REMOVE)
     @JsonIgnore
+    @OneToOne(cascade=CascadeType.REMOVE)
     private Media cv;
 
     @ManyToOne @JsonIgnoreProperties("users")
     private Role role;
 
     @JsonIgnore
-    @OneToMany(cascade=CascadeType.REMOVE, mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private List<Post> posts;
 
-    @OneToMany(mappedBy = "user")
     @JsonIgnore
+    @ManyToMany(mappedBy = "likedBy")
+    private Set<Post> liked;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
+    private List<Comment> comments;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     List<JwtToken> jwtTokens;
 
     public User(RegisterRequest registerRequest) {
@@ -65,5 +75,13 @@ public class User {
 
     public void addPost(Post post) {
         posts.add(post);
+    }
+
+    public void addLiked(Post post) {
+        liked.add(post);
+    }
+
+    public void addComment(Comment comment) {
+        comments.add(comment);
     }
 }
