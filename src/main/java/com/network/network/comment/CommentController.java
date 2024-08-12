@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/users/{userId}/posts/{postId}/comments")
+@CrossOrigin("*")
 public class CommentController {
     @Resource
     private HelperService helperService;

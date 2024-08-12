@@ -13,6 +13,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -47,19 +49,19 @@ public class User {
 
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
-    private List<Post> posts;
+    private List<Post> posts = new ArrayList<>();
 
     @JsonIgnore
     @ManyToMany(mappedBy = "likedBy")
-    private Set<Post> liked;
+    private Set<Post> liked = new HashSet<>();
 
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
-    private List<Comment> comments;
+    private List<Comment> comments = new ArrayList<>();
 
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
-    List<JwtToken> jwtTokens;
+    List<JwtToken> jwtTokens = new ArrayList<>();
 
     public User(RegisterRequest registerRequest) {
         this.firstName = registerRequest.getFirstName();

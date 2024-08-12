@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@CrossOrigin("*")
 @RequestMapping("user/{userId}/media")
+@CrossOrigin("*")
 public class UserMediaController {
     @Resource private MediaService mediaService;
 

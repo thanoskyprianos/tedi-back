@@ -1,15 +1,11 @@
 package com.network.network.post.service;
 
-import com.network.network.comment.Comment;
 import com.network.network.post.Post;
 import com.network.network.post.exception.PostNotFoundException;
 import com.network.network.post.resource.PostRepository;
 import com.network.network.user.User;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Set;
 
 @Service
 public class PostService {
@@ -32,17 +28,5 @@ public class PostService {
 
     public void removePost(Post post) {
         postRepository.delete(post);
-    }
-
-    public Set<User> getLikes(int id) {
-        Post post = getPost(id);
-
-        return post.getLikedBy();
-    }
-
-    public List<Comment> getComments(int id) {
-        Post post = getPost(id);
-
-        return post.getComments();
     }
 }

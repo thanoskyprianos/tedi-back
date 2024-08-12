@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/users/{userId}/posts/{postId}/media")
+@CrossOrigin("*")
 public class PostMediaController {
     @Resource
     private UserService userService;

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/users/{userId}/posts")
+@CrossOrigin("*")
 public class PostController {
     @Resource
     private PostService postService;
