@@ -1,9 +1,11 @@
 package com.network.network.post;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.network.network.comment.Comment;
 import com.network.network.comment.resource.CommentResourceAssembler;
 import com.network.network.comment.service.CommentService;
 import com.network.network.misc.HelperService;
+import com.network.network.misc.View;
 import com.network.network.post.resource.PostResourceAssembler;
 import com.network.network.post.service.PostService;
 import com.network.network.user.User;
@@ -18,8 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/users/{userId}/posts")
-@CrossOrigin("*")
+@RequestMapping(value = "/users/{userId}/posts", produces = "application/hal+json")
 public class PostController {
     @Resource
     private PostService postService;
@@ -43,6 +44,7 @@ public class PostController {
     private HelperService helperService;
 
     @GetMapping("")
+    @JsonView(View.AsProfessional.class)
     public ResponseEntity<?> getUserPosts(@PathVariable int userId) {
         User user = userService.getUserById(userId);
 
@@ -50,6 +52,7 @@ public class PostController {
     }
 
     @GetMapping("/{postId}")
+    @JsonView(View.AsProfessional.class)
     public ResponseEntity<?> getUserPost(@PathVariable int userId, @PathVariable int postId) {
         Post post = helperService.getPostByPair(userId, postId);
 
@@ -58,6 +61,7 @@ public class PostController {
 
 
     @PostMapping("") @Transactional
+    @JsonView(View.AsProfessional.class)
     @PreAuthorize("#userId == principal.getId()")
     public ResponseEntity<?> addPost(@PathVariable int userId, @RequestBody Post post) {
         User user = userService.getUserById(userId);
@@ -76,6 +80,7 @@ public class PostController {
     }
 
     @DeleteMapping("/{postId}")
+    @JsonView(View.AsProfessional.class)
     @PreAuthorize("#userId == principal.getId() || hasRole('ADMIN')")
     public ResponseEntity<?> deleteUserPost(@PathVariable int userId, @PathVariable int postId) {
         Post post = helperService.getPostByPair(userId, postId);
@@ -86,6 +91,7 @@ public class PostController {
     }
 
     @GetMapping("/liked")
+    @JsonView(View.AsProfessional.class)
     public ResponseEntity<?> getUserLikedPosts(@PathVariable int userId) {
         User user = userService.getUserById(userId);
 
@@ -93,16 +99,18 @@ public class PostController {
     }
 
     @GetMapping("/{postId}/likes")
+    @JsonView(View.AsProfessional.class)
     public ResponseEntity<?> likesForPost(
             @PathVariable int userId,
             @PathVariable int postId
     ) {
         Post post = helperService.getPostByPair(userId, postId);
 
-        return ResponseEntity.ok(userResourceAssembler.toUserCollectionModel(post.getLikedBy()));
+        return ResponseEntity.ok(userResourceAssembler.toCollectionModel(post.getLikedBy()));
     }
 
     @GetMapping("/{postId}/comments")
+    @JsonView(View.AsProfessional.class)
     public ResponseEntity<?> commentsForPost(
             @PathVariable int userId,
             @PathVariable int postId
@@ -114,6 +122,7 @@ public class PostController {
 
     @Transactional
     @PostMapping("/{postId}/like")
+    @JsonView(View.AsProfessional.class)
     public ResponseEntity<?> likePost(
             @PathVariable int userId,
             @PathVariable int postId
@@ -132,6 +141,7 @@ public class PostController {
 
     @Transactional
     @PostMapping("/{postId}/comment")
+    @JsonView(View.AsProfessional.class)
     public ResponseEntity<?> commentPost(
             @PathVariable int userId,
             @PathVariable int postId,

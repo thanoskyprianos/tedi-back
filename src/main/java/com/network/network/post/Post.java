@@ -1,8 +1,11 @@
 package com.network.network.post;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.network.network.comment.Comment;
 import com.network.network.media.Media;
+import com.network.network.misc.View;
 import com.network.network.user.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -19,11 +22,13 @@ public class Post {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @JsonView(View.AsProfessional.class)
     private String text;
 
-    @Column(updatable=false)
-    @Temporal(TemporalType.TIMESTAMP)
     @CreationTimestamp
+    @Column(updatable=false)
+    @JsonView(View.AsAdmin.class)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date created;
 
     @JsonIgnore
@@ -34,10 +39,14 @@ public class Post {
     @OneToMany(cascade = CascadeType.REMOVE)
     private List<Media> mediaList = new ArrayList<>();
 
-    @ManyToOne @JsonIgnore
+    @ManyToOne
+    @JsonView(View.AsAdmin.class)
+    @JsonIgnoreProperties({"comments", "posts", "liked", "info", "role", "connected"})
     private User user;
 
-    @JsonIgnore @ManyToMany
+    @ManyToMany
+    @JsonView(View.AsAdmin.class)
+    @JsonIgnoreProperties({"comments", "posts", "liked", "info", "role", "connected"})
     @JoinTable(name = "post_likes",
         joinColumns = @JoinColumn(name = "post"),
         inverseJoinColumns = @JoinColumn(name = "user"),
@@ -45,7 +54,7 @@ public class Post {
     )
     private Set<User> likedBy = new HashSet<>();
 
-    @JsonIgnore
+    @JsonView(View.AsAdmin.class)
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
     private List<Comment> comments = new ArrayList<>();
 

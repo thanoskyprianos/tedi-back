@@ -1,7 +1,9 @@
 package com.network.network.media;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.network.network.media.exception.MediaNotExistsException;
 import com.network.network.media.service.MediaService;
+import com.network.network.misc.View;
 import com.network.network.post.Post;
 import com.network.network.post.service.PostService;
 import com.network.network.user.User;
@@ -14,8 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/users/{userId}/posts/{postId}/media")
-@CrossOrigin("*")
+@RequestMapping(value = "/users/{userId}/posts/{postId}/media", produces = "application/hal+json")
 public class PostMediaController {
     @Resource
     private UserService userService;
@@ -27,6 +28,7 @@ public class PostMediaController {
     private MediaService mediaService;
 
     @GetMapping("/{mediaIdx}")
+    @JsonView(View.AsProfessional.class)
     public ResponseEntity<?> getMedia(@PathVariable int userId, @PathVariable int postId, @PathVariable int mediaIdx) {
         User user = userService.getUserById(userId);
         Post post = postService.getPostByIdAndUser(postId, user);
@@ -45,6 +47,7 @@ public class PostMediaController {
     }
 
     @PostMapping("")
+    @JsonView(View.AsProfessional.class)
     @PreAuthorize("#userId == principal.getId()")
     public ResponseEntity<?> addMedia(
             @PathVariable int userId,

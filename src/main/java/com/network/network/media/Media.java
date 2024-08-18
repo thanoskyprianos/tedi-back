@@ -1,6 +1,8 @@
 package com.network.network.media;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.network.network.misc.View;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,9 +25,9 @@ public class Media {
     private String contentType;
 
     @UpdateTimestamp
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_update")
-    @JsonIgnore
+    @JsonView(View.AsAdmin.class)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date date; // can use it for deleting orphans
 
     public Media(String path, String contentType) {

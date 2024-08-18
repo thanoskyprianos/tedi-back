@@ -8,8 +8,6 @@ import com.network.network.user.User;
 import com.network.network.user.service.UserService;
 import jakarta.annotation.Resource;
 import lombok.NonNull;
-import org.apache.commons.collections4.IterableUtils;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
@@ -69,10 +67,5 @@ public class PostResourceAssembler implements RepresentationModelAssembler<Post,
         }
 
         return model;
-    }
-
-    @Override @NonNull
-    public CollectionModel<EntityModel<Post>> toCollectionModel(@NonNull Iterable<? extends Post> entities) {
-        return CollectionModel.of(IterableUtils.toList(entities).stream().map(this::toModel).toList());
     }
 }

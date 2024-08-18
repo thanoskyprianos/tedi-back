@@ -30,6 +30,6 @@ public class HelperService {
         User user = userService.getUserById(userId);
         Post post = postService.getPostByIdAndUser(postId, user);
 
-        return commentService.getCommentByIdAndUserAndPost(commentId, user, post);
+        return commentService.getCommentByPost(commentId, post);
     }
 }

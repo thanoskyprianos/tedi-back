@@ -9,10 +9,11 @@ import com.network.network.security.jwt.JwtUtil;
 import com.network.network.user.User;
 import com.network.network.user.exception.LoginException;
 import com.network.network.user.exception.UserNotFoundException;
+import com.network.network.user.info.Info;
+import com.network.network.user.info.exception.InfoNotSetException;
 import com.network.network.user.repr.AuthResponse;
 import com.network.network.user.repr.LoginRequest;
 import com.network.network.user.resource.UserRepository;
-import com.network.network.user.resource.UserResourceAssembler;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -115,5 +116,16 @@ public class UserService {
 
     public void deleteUser(int id) {
         userRepository.deleteById(id);
+    }
+
+    public Info getUserInfoOrThrow(int id) {
+        User user = getUserById(id);
+        Info info = user.getInfo();
+
+        if  (info == null) {
+            throw new InfoNotSetException();
+        }
+
+        return info;
     }
 }

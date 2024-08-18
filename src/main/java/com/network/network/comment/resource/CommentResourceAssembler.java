@@ -8,7 +8,6 @@ import com.network.network.user.UserController;
 import com.network.network.user.service.UserService;
 import jakarta.annotation.Resource;
 import lombok.NonNull;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
@@ -50,10 +49,5 @@ public class CommentResourceAssembler implements RepresentationModelAssembler<Co
         );
 
         return model;
-    }
-
-    @Override @NonNull
-    public CollectionModel<EntityModel<Comment>> toCollectionModel(@NonNull Iterable<? extends Comment> entities) {
-        return RepresentationModelAssembler.super.toCollectionModel(entities);
     }
 }

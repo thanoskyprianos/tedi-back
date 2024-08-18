@@ -4,7 +4,6 @@ import com.network.network.comment.Comment;
 import com.network.network.comment.exception.CommentNotFoundException;
 import com.network.network.comment.resource.CommentRepository;
 import com.network.network.post.Post;
-import com.network.network.user.User;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
@@ -21,9 +20,9 @@ public class CommentService {
         commentRepository.delete(comment);
     }
 
-    public Comment getCommentByIdAndUserAndPost(int commentId, User user, Post post) {
+    public Comment getCommentByPost(int commentId, Post post) {
         return commentRepository
-                .findByIdAndUserAndPost(commentId, user, post)
+                .findByIdAndPost(commentId, post)
                 .orElseThrow(() -> new CommentNotFoundException(commentId));
     }
 }

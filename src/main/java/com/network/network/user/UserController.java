@@ -1,9 +1,10 @@
 package com.network.network.user;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import com.network.network.misc.View;
 import com.network.network.user.exception.DuplicateEmailException;
 import com.network.network.user.repr.LoginRequest;
 import com.network.network.user.repr.RegisterRequest;
-import com.network.network.user.repr.UserRepr;
 import com.network.network.user.resource.UserRepository;
 import com.network.network.user.resource.UserResourceAssembler;
 import com.network.network.user.service.UserService;
@@ -20,8 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/users")
-@CrossOrigin("*")
+@RequestMapping(value = "/users", produces = "application/hal+json")
 public class UserController {
     @Resource
     private UserService userService;
@@ -33,13 +33,15 @@ public class UserController {
     private UserRepository userRepository;
 
     @GetMapping("")
+    @JsonView(View.AsProfessional.class)
     public ResponseEntity<?> getUsers() {
         List<User> users = userService.getAllUsers();
 
-        return ResponseEntity.ok(userResourceAssembler.toUserCollectionModel(users));
+        return ResponseEntity.ok(userResourceAssembler.toCollectionModel(users));
     }
 
     @GetMapping("/self")
+    @JsonView(View.AsProfessional.class)
     public ResponseEntity<?> getSelf() {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userService.getUserByEmail(userDetails.getUsername());
@@ -48,16 +50,19 @@ public class UserController {
     }
 
     @GetMapping("/like")
+    @JsonView(View.AsProfessional.class)
     public List<User> likeUser(@RequestParam String fullName) {
         return userRepository.findByNameLike(fullName);
     }
 
     @PostMapping("/login")
+    @JsonView(View.AsProfessional.class)
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         return ResponseEntity.ok(userResourceAssembler.toModel(userService.loginUser(loginRequest)));
     }
 
     @PostMapping("/register")
+    @JsonView(View.AsProfessional.class)
     public ResponseEntity<?> register(
             @RequestBody RegisterRequest registerRequest
     ) {
@@ -69,7 +74,7 @@ public class UserController {
         user = userService.saveUser(user);
 
         // auto login
-        EntityModel<UserRepr> userModel = userResourceAssembler
+        EntityModel<User> userModel = userResourceAssembler
                 .toModel(userService.loginUser( // use the request password since it has been encoded on user
                         new LoginRequest(user.getEmail(), registerRequest.getPassword())));
 
@@ -79,11 +84,13 @@ public class UserController {
     }
 
     @GetMapping("/logout/success")
+    @JsonView(View.AsProfessional.class)
     public ResponseEntity<?> logout() {
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}")
+    @JsonView(View.AsProfessional.class)
     public ResponseEntity<?> getUser(@PathVariable int id) {
         User user = userService.getUserById(id);
 
@@ -91,10 +98,35 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
+    @JsonView(View.AsProfessional.class)
     @PreAuthorize("#id == principal.getId() || hasRole('ADMIN')")
     public ResponseEntity<?> deleteUser(@PathVariable int id) {
         userService.deleteUser(id);
 
         return ResponseEntity.ok(Map.of("message", "User " + id + " has been deleted"));
+    }
+
+    @GetMapping("/{id}/friends")
+    @JsonView(View.AsProfessional.class)
+    public ResponseEntity<?> getFriends(@PathVariable int id) {
+        User user = userService.getUserById(id);
+
+        return ResponseEntity.ok(userResourceAssembler.toCollectionModel(user.getConnected()));
+    }
+
+    // todo: move
+    @JsonView(View.AsProfessional.class)
+    @PutMapping("/{id}/befriend/{friendId}")
+    public ResponseEntity<?> addFriend(@PathVariable int id, @PathVariable int friendId) {
+        User user = userService.getUserById(id);
+        User friend = userService.getUserById(friendId);
+
+        user.addConnected(friend);
+        friend.addConnected(user);
+
+        userService.updateUser(user);
+        userService.updateUser(friend);
+
+        return ResponseEntity.noContent().build();
     }
 }
