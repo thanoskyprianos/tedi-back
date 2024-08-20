@@ -30,37 +30,50 @@ public class Info {
 
     @Enumerated(EnumType.STRING)
     @JsonView(View.AsAdmin.class)
-    private Privacy professionalPositionPrivacy = Privacy.PRIVATE;
+    private Privacy professionalPositionPrivacy;
 
     @Enumerated(EnumType.STRING)
     @JsonView(View.AsAdmin.class)
-    private Privacy employmentAgencyPrivacy = Privacy.PRIVATE;
+    private Privacy employmentAgencyPrivacy;
 
     @Enumerated(EnumType.STRING)
     @JsonView(View.AsAdmin.class)
-    private Privacy experiencePrivacy = Privacy.PRIVATE;
+    private Privacy experiencePrivacy;
 
     @Enumerated(EnumType.STRING)
     @JsonView(View.AsAdmin.class)
-    private Privacy educationPrivacy = Privacy.PRIVATE;
+    private Privacy educationPrivacy;
 
     @Enumerated(EnumType.STRING)
     @JsonView(View.AsAdmin.class)
-    private Privacy skillsPrivacy = Privacy.PRIVATE;
+    private Privacy skillsPrivacy;
 
-    public Info(Info info, User principal) { // used to construct response
-        this.professionalPosition = info.professionalPositionPrivacy == Privacy.PUBLIC ? info.professionalPosition : null;
-        this.employmentAgency = info.employmentAgencyPrivacy == Privacy.PUBLIC ? info.employmentAgency : null;
-        this.experience = info.experiencePrivacy == Privacy.PUBLIC ? info.experience : null;
-        this.education = info.educationPrivacy == Privacy.PUBLIC ? info.education : null;
-        this.skills = info.skillsPrivacy == Privacy.PUBLIC ? info.skills : null;
+    public Info(Info info) { // used to construct response
+        this.professionalPosition = info.professionalPositionPrivacy == Privacy.PUBLIC? info.professionalPosition : null;
+        this.employmentAgency = info.employmentAgencyPrivacy == Privacy.PUBLIC? info.employmentAgency : null;
+        this.experience = info.experiencePrivacy == Privacy.PUBLIC? info.experience : null;
+        this.education = info.educationPrivacy == Privacy.PUBLIC? info.education : null;
+        this.skills = info.skillsPrivacy == Privacy.PUBLIC? info.skills : null;
 
-        if (info.user.isConnected(principal)) { // change or keep same
-            this.professionalPosition = info.professionalPositionPrivacy == Privacy.CONNECTED ? info.professionalPosition : this.professionalPosition;
-            this.employmentAgency = info.employmentAgencyPrivacy == Privacy.CONNECTED ? info.employmentAgency : this.employmentAgency;
-            this.experience = info.experiencePrivacy == Privacy.CONNECTED ? info.experience : this.experience;
-            this.education = info.educationPrivacy == Privacy.CONNECTED ? info.education : this.education;
-            this.skills = info.skillsPrivacy == Privacy.CONNECTED ? info.skills : this.skills;
-        }
+        this.id = info.id;
+        this.user = info.user;
+
+        this.professionalPositionPrivacy = info.professionalPositionPrivacy;
+        this.employmentAgencyPrivacy = info.employmentAgencyPrivacy;
+        this.experiencePrivacy = info.experiencePrivacy;
+        this.educationPrivacy = info.educationPrivacy;
+        this.skillsPrivacy = info.skillsPrivacy;
+    }
+
+    public static Info allPrivate() {
+        Info info = new Info();
+
+        info.professionalPositionPrivacy = Privacy.PRIVATE;
+        info.employmentAgencyPrivacy = Privacy.PRIVATE;
+        info.experiencePrivacy = Privacy.PRIVATE;
+        info.educationPrivacy = Privacy.PRIVATE;
+        info.skillsPrivacy = Privacy.PRIVATE;
+
+        return info;
     }
 }

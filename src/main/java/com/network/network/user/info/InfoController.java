@@ -6,7 +6,6 @@ import com.network.network.user.User;
 import com.network.network.user.info.service.InfoService;
 import com.network.network.user.service.UserService;
 import jakarta.annotation.Resource;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -35,24 +34,11 @@ public class InfoController {
             return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.ok(new Info(info, principal));
+        return ResponseEntity.ok(new Info(info));
     }
 
-    @JsonView(View.AsProfessional.class)
-    @PostMapping("") @PreAuthorize("#id == principal.getId()")
-    public ResponseEntity<?> addInfo(@PathVariable int id, @RequestBody Info info) {
-        User user = userService.getUserById(id);
-
-        info.setUser(user);
-        infoService.saveInfo(info);
-
-        user.setInfo(info);
-        userService.updateUser(user);
-
-        return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
-
-    @PutMapping("")
+    @PutMapping("") // user always has info from construction
+    @PreAuthorize("#id == principal.getId()")
     @JsonView(View.AsProfessional.class)
     public ResponseEntity<?> updateInfo(@PathVariable int id, @RequestBody Info info) {
         User user = userService.getUserById(id);
@@ -64,32 +50,15 @@ public class InfoController {
         return ResponseEntity.ok(userInfo);
     }
 
-    @PutMapping("/experience/{privacy}") @PreAuthorize("#id == principal.getId()")
+    @PutMapping("/privacy")
+    @PreAuthorize("#id == principal.getId()")
     @JsonView(View.AsProfessional.class)
-    public ResponseEntity<?> updateExperience(@PathVariable int id, @PathVariable String privacy) {
-        Info info = userService.getUserInfoOrThrow(id);
+    public ResponseEntity<?> updateInfoPrivacy(@PathVariable int id, @RequestBody Info info) {
+        User user = userService.getUserById(id);
 
-        infoService.updateExperiencePrivacy(info, Privacy.valueOf(privacy.toUpperCase()));
+        Info userInfo = user.getInfo();
 
-        return ResponseEntity.noContent().build();
-    }
-
-    @PutMapping("/education/{privacy}") @PreAuthorize("#id == principal.getId()")
-    @JsonView(View.AsProfessional.class)
-    public ResponseEntity<?> updateEducation(@PathVariable int id, @PathVariable String privacy) {
-        Info info = userService.getUserInfoOrThrow(id);
-
-        infoService.updateEducationPrivacy(info, Privacy.valueOf(privacy.toUpperCase()));
-
-        return ResponseEntity.noContent().build();
-    }
-
-    @PutMapping("/skills/{privacy}") @PreAuthorize("#id == principal.getId()")
-    @JsonView(View.AsProfessional.class)
-    public ResponseEntity<?> updateSkills(@PathVariable int id, @PathVariable String privacy) {
-        Info info = userService.getUserInfoOrThrow(id);
-
-        infoService.updateSkillsPrivacy(info, Privacy.valueOf(privacy.toUpperCase()));
+        infoService.updateInfoPrivacy(userInfo, info);
 
         return ResponseEntity.noContent().build();
     }

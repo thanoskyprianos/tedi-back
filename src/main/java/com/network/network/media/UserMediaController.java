@@ -38,31 +38,16 @@ public class UserMediaController {
                 .body(mediaService.fetchMedia(media));
     }
 
-//    @GetMapping("/cv")
-//    @JsonView(View.AsProfessional.class)
-//    public ResponseEntity<?> getUserCV(@PathVariable int userId) {
-//        User user = userService.getUserById(userId);
-//        Media media = user.getCv();
-//
-//        if (media == null) {
-//            return ResponseEntity.noContent().build();
-//        }
-//
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.add("Content-Type", media.getContentType());
-//
-//        return ResponseEntity
-//                .ok()
-//                .headers(headers)
-//                .body(mediaService.fetchMedia(media));
-//    }
-
     @PostMapping("/avatar") @PreAuthorize("#userId == principal.getId()")
     @JsonView(View.AsProfessional.class)
     public ResponseEntity<?> uploadUserAvatar(@PathVariable int userId, @RequestParam MultipartFile file) {
-        Media media = mediaService.saveFile(file);
-
         User user = userService.getUserById(userId);
+
+        if (user.getAvatar() != null) {
+            return updateUserAvatar(userId, file);
+        }
+
+        Media media = mediaService.saveFile(file);
         user.setAvatar(media);
 
         userService.updateUser(user);
@@ -70,34 +55,18 @@ public class UserMediaController {
         return ResponseEntity.ok(media);
     }
 
-//    @PostMapping("/cv") @PreAuthorize("#userId == principal.getId()")
-//    @JsonView(View.AsProfessional.class)
-//    public ResponseEntity<?> uploadUserCV(@PathVariable int userId, @RequestParam MultipartFile file) {
-//        Media media = mediaService.saveFile(file);
-//
-//        User user = userService.getUserById(userId);
-//        user.setCv(media);
-//
-//        userService.updateUser(user);
-//
-//        return ResponseEntity.ok(media);
-//    }
-
     @PutMapping("/avatar") @PreAuthorize("#userId == principal.getId()")
     @JsonView(View.AsProfessional.class)
     public ResponseEntity<?> updateUserAvatar(@PathVariable int userId, @RequestParam MultipartFile file) {
-        Media media = userService.getUserById(userId).getAvatar();
+        User user = userService.getUserById(userId);
+
+        if (user.getAvatar() == null) {
+            return uploadUserAvatar(userId, file);
+        }
+
+        Media media = user.getAvatar();
         media = mediaService.updateFile(media.getId(), file);
 
         return ResponseEntity.ok(media);
     }
-
-//    @PutMapping("/cv") @PreAuthorize("#userId == principal.getId()")
-//    @JsonView(View.AsProfessional.class)
-//    public ResponseEntity<?> updateUserCV(@PathVariable int userId, @RequestParam MultipartFile file) {
-//        Media media = userService.getUserById(userId).getCv();
-//        media = mediaService.updateFile(media.getId(), file);
-//
-//        return ResponseEntity.ok(media);
-//    }
 }

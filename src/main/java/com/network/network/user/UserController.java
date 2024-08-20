@@ -9,6 +9,7 @@ import com.network.network.user.resource.UserRepository;
 import com.network.network.user.resource.UserResourceAssembler;
 import com.network.network.user.service.UserService;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
@@ -57,14 +58,19 @@ public class UserController {
 
     @PostMapping("/login")
     @JsonView(View.AsProfessional.class)
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-        return ResponseEntity.ok(userResourceAssembler.toModel(userService.loginUser(loginRequest)));
+    public ResponseEntity<?> login(
+            @RequestBody LoginRequest loginRequest,
+            HttpServletRequest request
+    ) {
+        return ResponseEntity.ok(userResourceAssembler.toModel(userService.loginUser(loginRequest, request)));
     }
 
     @PostMapping("/register")
     @JsonView(View.AsProfessional.class)
     public ResponseEntity<?> register(
-            @RequestBody RegisterRequest registerRequest
+            @RequestBody RegisterRequest registerRequest,
+            HttpServletRequest request
+
     ) {
         if (userService.userExistsByEmail(registerRequest.getEmail())) {
             throw new DuplicateEmailException(registerRequest.getEmail());
@@ -76,7 +82,7 @@ public class UserController {
         // auto login
         EntityModel<User> userModel = userResourceAssembler
                 .toModel(userService.loginUser( // use the request password since it has been encoded on user
-                        new LoginRequest(user.getEmail(), registerRequest.getPassword())));
+                        new LoginRequest(user.getEmail(), registerRequest.getPassword()), request));
 
         return ResponseEntity
                 .created(userModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
@@ -106,6 +112,46 @@ public class UserController {
         return ResponseEntity.ok(Map.of("message", "User " + id + " has been deleted"));
     }
 
+    @PutMapping("/{id}/email")
+    @JsonView(View.AsProfessional.class)
+    @PreAuthorize("#id == principal.getId()")
+    public ResponseEntity<?> updateEmail(@PathVariable int id, @RequestBody String newEmail) {
+        User user = userService.getUserById(id);
+
+        userService.updateEmail(user, newEmail);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/password")
+    @JsonView(View.AsProfessional.class)
+    @PreAuthorize("#id == principal.getId()")
+    public ResponseEntity<?> updatePassword(@PathVariable int id, @RequestBody String newPassword) {
+        User user = userService.getUserById(id);
+
+        userService.updatePassword(user, newPassword);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/credentials")
+    @JsonView(View.AsProfessional.class)
+    @PreAuthorize("#id == principal.getId()")
+    public ResponseEntity<?> updateCredentials(@PathVariable int id, @RequestBody LoginRequest loginRequest) {
+        User user = userService.getUserById(id);
+
+        if (loginRequest.getPassword() != null) {
+            userService.updatePassword(user, loginRequest.getPassword());
+        }
+
+        if (loginRequest.getEmail() != null) {
+            userService.updateEmail(user, loginRequest.getEmail());
+        }
+
+        return ResponseEntity.noContent().build();
+    }
+
+    // todo: move
     @GetMapping("/{id}/friends")
     @JsonView(View.AsProfessional.class)
     public ResponseEntity<?> getFriends(@PathVariable int id) {

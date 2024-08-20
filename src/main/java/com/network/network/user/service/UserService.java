@@ -3,6 +3,7 @@ package com.network.network.user.service;
 import com.network.network.role.Role;
 import com.network.network.role.exception.RoleNotFoundException;
 import com.network.network.role.service.RoleService;
+import com.network.network.security.jwt.JwtAuthFilter;
 import com.network.network.security.jwt.JwtToken;
 import com.network.network.security.jwt.JwtTokenRepository;
 import com.network.network.security.jwt.JwtUtil;
@@ -10,11 +11,12 @@ import com.network.network.user.User;
 import com.network.network.user.exception.LoginException;
 import com.network.network.user.exception.UserNotFoundException;
 import com.network.network.user.info.Info;
-import com.network.network.user.info.exception.InfoNotSetException;
+import com.network.network.user.info.service.InfoService;
 import com.network.network.user.repr.AuthResponse;
 import com.network.network.user.repr.LoginRequest;
 import com.network.network.user.resource.UserRepository;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -33,13 +35,18 @@ public class UserService {
 
     @Resource RoleService roleService;
 
+    @Resource InfoService infoService;
+
     @Resource JwtUtil jwtUtil;
+
+    @Resource JwtAuthFilter jwtAuthFilter;
+
+    @Resource JwtTokenRepository jwtTokenRepository;
 
     @Resource AuthenticationManager authenticationManager;
 
     @Resource PasswordEncoder passwordEncoder;
 
-    @Resource JwtTokenRepository jwtTokenRepository;
 
     @Value("${roles.names.admin}")
     String adminName;
@@ -72,7 +79,7 @@ public class UserService {
         return userRepository.findByEmail(email).isPresent();
     }
 
-    public AuthResponse loginUser(LoginRequest loginRequest) {
+    public AuthResponse loginUser(LoginRequest loginRequest, HttpServletRequest request) {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -94,6 +101,8 @@ public class UserService {
 
         jwtTokenRepository.save(jwtToken);
 
+        jwtAuthFilter.setContext(request, token);
+
         return new AuthResponse(user, token);
     }
 
@@ -105,27 +114,35 @@ public class UserService {
         user.setRole(role);
         role.addUser(user);
 
+        Info info = Info.allPrivate();
+        info.setUser(user);
+        user.setInfo(info);
+
+        infoService.saveInfo(info);
+
         user.setPassword(passwordEncoder.encode(user.getPassword())); // BCrypt encoding
 
         return userRepository.save(user);
     }
 
-    public User updateUser(User user) {
-        return userRepository.save(user);
+    public void updateUser(User user) {
+        userRepository.save(user);
     }
 
     public void deleteUser(int id) {
         userRepository.deleteById(id);
     }
 
-    public Info getUserInfoOrThrow(int id) {
-        User user = getUserById(id);
-        Info info = user.getInfo();
+    public void updateEmail(User user, String email) {
+        user.setEmail(email);
+        updateUser(user);
 
-        if  (info == null) {
-            throw new InfoNotSetException();
-        }
+        // principal username changed
+        jwtUtil.invalidateAllTokens(user);
+    }
 
-        return info;
+    public void updatePassword(User user, String password) {
+        user.setPassword(passwordEncoder.encode(password));
+        updateUser(user);
     }
 }
