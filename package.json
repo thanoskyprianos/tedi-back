@@ -1,0 +1,27 @@
+{
+  "dependencies": {
+    "socket.io": "^4.7.5",
+    "ws": "^8.18.0"
+  },
+  "name": "tedi-back",
+  "version": "1.0.0",
+  "main": "index.js",
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thanoskyprianos/tedi-back.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/thanoskyprianos/tedi-back/issues"
+  },
+  "homepage": "https://github.com/thanoskyprianos/tedi-back#readme",
+  "description": ""
+}
