@@ -43,6 +43,12 @@ public class PostController {
     @Resource
     private HelperService helperService;
 
+    @GetMapping("/for")
+    @JsonView(View.AsProfessional.class)
+    public ResponseEntity<?> getPostsForUser(@PathVariable int userId) {
+        return ResponseEntity.ok(postResourceAssembler.toCollectionModel(postService.getAllPosts()));
+    }
+
     @GetMapping("")
     @JsonView(View.AsProfessional.class)
     public ResponseEntity<?> getUserPosts(@PathVariable int userId) {

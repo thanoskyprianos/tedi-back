@@ -19,6 +19,7 @@ import java.util.*;
 @Getter @Setter
 @NoArgsConstructor
 public class Post {
+    @JsonView(View.AsProfessional.class)
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 

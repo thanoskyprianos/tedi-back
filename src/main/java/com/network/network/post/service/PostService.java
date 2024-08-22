@@ -7,10 +7,16 @@ import com.network.network.user.User;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class PostService {
     @Resource
     private PostRepository postRepository;
+
+    public List<Post> getAllPosts() {
+        return postRepository.findAll();
+    }
 
     public Post getPost(int id) {
         return postRepository.findById(id)

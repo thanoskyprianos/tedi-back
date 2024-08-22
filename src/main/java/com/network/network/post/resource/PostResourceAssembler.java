@@ -5,6 +5,7 @@ import com.network.network.media.PostMediaController;
 import com.network.network.post.Post;
 import com.network.network.post.PostController;
 import com.network.network.user.User;
+import com.network.network.user.UserController;
 import com.network.network.user.service.UserService;
 import jakarta.annotation.Resource;
 import lombok.NonNull;
@@ -43,7 +44,8 @@ public class PostResourceAssembler implements RepresentationModelAssembler<Post,
 
                 linkTo(methodOn(PostController.class).commentsForPost(
                         entity.getUser().getId(),
-                        entity.getId())).withRel("comments")
+                        entity.getId())).withRel("comments"),
+                linkTo(methodOn(UserController.class).getUser(entity.getUser().getId())).withRel("author")
         );
 
         // only if author requests post
