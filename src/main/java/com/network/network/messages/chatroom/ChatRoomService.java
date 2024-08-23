@@ -1,7 +1,8 @@
 package com.network.network.messages.chatroom;
 
-import org.springframework.stereotype.Service;
+import com.network.network.user.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
@@ -13,7 +14,7 @@ public class ChatRoomService{
 
     // returns a chat room, if not exists it creates one.
     public Optional<String> getChatRoomId(
-        String senderId, String receiverId,
+        User senderId, User receiverId,
         boolean createNewRoomIfNotExists
         ) {
         return ChatRoomRepo.findBySenderIdAndReceiverId(senderId, receiverId)
@@ -28,7 +29,7 @@ public class ChatRoomService{
     }
 
 
-    private String createChat(String senderId, String receiverId) {
+    private String createChat(User senderId, User receiverId) {
         
         var chatId = String.format("%s_%s", senderId, receiverId);
         

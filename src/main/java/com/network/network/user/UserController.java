@@ -13,6 +13,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -174,5 +177,12 @@ public class UserController {
         userService.updateUser(friend);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @MessageMapping("/user.addUser")
+    @SendTo("/user/topic")
+    public User addUser(@Payload User user) {
+        userService.saveUser(user);
+        return user;
     }
 }

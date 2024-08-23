@@ -1,6 +1,7 @@
 package com.network.network.messages.chat;
 
 import com.network.network.messages.chatroom.ChatRoomService;
+import com.network.network.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +34,7 @@ public class ChatMessageService {
     // Retrieves chat messages.
     // if sender and receiver do not have a chat room: false is returned.
     public List<ChatMessages> findChatMessages(
-            String senderId, String receiverId
+            User senderId, User receiverId
     ) {
         var chatId = chatRoomService.getChatRoomId(
                 senderId, receiverId, false);

@@ -1,6 +1,7 @@
 package com.network.network.messages.chat;
 
-import jakarta.persistence.Id;
+import com.network.network.user.User;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Date;
@@ -10,12 +11,20 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Entity
 public class ChatMessages {
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
     private String chatId;
-    private String senderId;
-    private String receiverId;
+
+    @ManyToOne
+    private User senderId;
+    
+    @ManyToOne
+    private User receiverId;
+
     private String message;
     private Date date;
 }

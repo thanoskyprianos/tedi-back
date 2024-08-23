@@ -1,7 +1,15 @@
 // Representation of the chat room
 
 package com.network.network.messages.chatroom;
-import lombok.*;
+
+import com.network.network.user.User;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.ManyToOne;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 
 @Getter
@@ -10,8 +18,13 @@ import org.springframework.data.annotation.Id;
 @Builder
 public class ChatRoom {
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
     private String chatId;
-    private String senderId;
-    private String receiverId;
+
+    @ManyToOne
+    private User senderId;
+    
+    @ManyToOne
+    private User receiverId;
 }

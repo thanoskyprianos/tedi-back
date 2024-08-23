@@ -1,13 +1,14 @@
 package com.network.network.messages.chat;
 
+import com.network.network.user.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class ChatMessageController {
     // Idea for sending messages
     private final ChatMessageService chatMessageService;
 
-    // Handling for WebSocket messages: Saves messages (chatMessageservice),
+    // Handling for WebSocket messages: Saves messages (chatMessage-service),
     // send notification to receiver using SimpMessagingTemplate.
     @MessageMapping
     public void processMessage(@Payload ChatMessages chatMessages) {
@@ -29,7 +30,7 @@ public class ChatMessageController {
         ChatMessages savedMessage = chatMessageService.save(chatMessages);
         
         messagingTemplate.convertAndSendToUser(
-            chatMessages.getReceiverId(), "queue/messages",
+                String.valueOf(chatMessages.getReceiverId()), "queue/messages",
             ChatNotification.builder()
                 .id(savedMessage.getId())
                 .senderId(savedMessage.getSenderId())
@@ -45,8 +46,8 @@ public class ChatMessageController {
     // returns list of those messages 
     @GetMapping("/messages/{senderId}/{receiverId}")
     public ResponseEntity<List<ChatMessages>> findChatMessages(
-            @PathVariable("senderId") String senderId,
-            @PathVariable("receiverId") String receiverId
+            @PathVariable("senderId") User senderId,
+            @PathVariable("receiverId") User receiverId
     ) {
         return ResponseEntity.ok(chatMessageService.findChatMessages(senderId, receiverId));
     }
