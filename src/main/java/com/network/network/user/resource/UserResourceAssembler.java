@@ -1,6 +1,9 @@
 package com.network.network.user.resource;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.network.network.connections.ConnectionController;
+import com.network.network.connections.ConnectionNotification;
+import com.network.network.connections.service.ConnectionService;
 import com.network.network.media.UserMediaController;
 import com.network.network.misc.View;
 import com.network.network.post.PostController;
@@ -22,6 +25,9 @@ public class UserResourceAssembler implements RepresentationModelAssembler<User,
     @Resource
     private UserService userService;
 
+    @Resource
+    private ConnectionService connectionService;
+
     @Override @NonNull
     @JsonView(View.AsProfessional.class)
     public EntityModel<User> toModel(@NonNull User entity) {
@@ -30,16 +36,57 @@ public class UserResourceAssembler implements RepresentationModelAssembler<User,
         EntityModel<User> entityModel = EntityModel.of(entity,
                 linkTo(methodOn(UserController.class).getUser(entity.getId())).withSelfRel(),
                 linkTo(methodOn(UserMediaController.class).getUserAvatar(entity.getId())).withRel("avatar"),
-                linkTo(methodOn(InfoController.class).getInfo(entity.getId())).withRel("info"),
-                linkTo(methodOn(PostController.class).getUserPosts(entity.getId())).withRel("posts")
+                linkTo(methodOn(InfoController.class).getInfo(entity.getId())).withRel("info")
         );
 
         if (entity.getId() == principal.getId()) {
             entityModel.add(
-                    linkTo(methodOn(UserController.class).updateEmail(entity.getId(), null)).withRel("email"),
-                    linkTo(methodOn(UserController.class).updatePassword(entity.getId(), null)).withRel("password"),
-                    linkTo(methodOn(UserController.class).updateCredentials(entity.getId(), null)).withRel("credentials")
+                    linkTo(methodOn(PostController.class)
+                            .getUserPosts(entity.getId())).withRel("posts"),
+                    linkTo(methodOn(UserController.class)
+                            .updateEmail(entity.getId(), null)).withRel("email"),
+                    linkTo(methodOn(UserController.class)
+                            .updatePassword(entity.getId(), null)).withRel("password"),
+                    linkTo(methodOn(UserController.class)
+                            .getConnections(entity.getId())).withRel("connections"),
+                    linkTo(methodOn(ConnectionController.class)
+                            .getSent(entity.getId())).withRel("sent"),
+                    linkTo(methodOn(ConnectionController.class)
+                            .getReceived(entity.getId())).withRel("received")
             );
+        } else if (principal.isConnected(entity)) {
+            entityModel.add(
+                    linkTo(methodOn(PostController.class)
+                            .getUserPosts(entity.getId())).withRel("posts"),
+                    linkTo(methodOn(UserController.class)
+                            .getConnections(entity.getId())).withRel("connections"),
+                    linkTo(methodOn(ConnectionController.class)
+                            .removeFriend(principal.getId(), entity.getId())).withRel("remove")
+            );
+        } else {
+            ConnectionNotification notification
+                    = connectionService.getRequest(principal.getId(), entity.getId());
+
+            if (notification != null) {
+                if (notification.getReceiver() == principal) {
+                    entityModel.add(
+                            linkTo(methodOn(ConnectionController.class)
+                                    .acceptRequest(principal.getId(), notification.getId())).withRel("accept"),
+                            linkTo(methodOn(ConnectionController.class)
+                                    .rejectRequest(principal.getId(), notification.getId())).withRel("reject")
+                    );
+                } else if (notification.getSender() == principal) {
+                    entityModel.add(
+                            linkTo(methodOn(ConnectionController.class)
+                                    .cancelRequest(principal.getId(), notification.getId())).withRel("cancel"));
+                }
+            } else {
+                entityModel.add(
+                        linkTo(methodOn(ConnectionController.class)
+                                .addFriend(principal.getId(), entity.getId())).withRel("add")
+                );
+            }
+
         }
 
         return entityModel;

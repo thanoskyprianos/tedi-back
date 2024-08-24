@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.network.network.comment.Comment;
 import com.network.network.media.Media;
 import com.network.network.misc.View;
+import com.network.network.connections.ConnectionNotification;
 import com.network.network.post.Post;
 import com.network.network.role.Role;
 import com.network.network.security.jwt.JwtToken;
@@ -78,6 +79,18 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private List<Comment> comments = new ArrayList<>();
 
+//    @JsonView(View.AsAdmin.class)
+//    @OneToMany(mappedBy = "of")
+//    private Set<Notification> notifications;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "sender")
+    private List<ConnectionNotification> requests = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "receiver")
+    private List<ConnectionNotification> received = new ArrayList<>();
+
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     List<JwtToken> jwtTokens = new ArrayList<>();
@@ -105,6 +118,8 @@ public class User {
         this.posts = new ArrayList<>(user.getPosts());
         this.liked = new HashSet<>(user.getLiked());
         this.comments = new ArrayList<>(user.getComments());
+        this.requests = new ArrayList<>(user.getRequests());
+        this.received = new ArrayList<>(user.getReceived());
         this.jwtTokens = new ArrayList<>(user.getJwtTokens());
     }
 
@@ -128,7 +143,16 @@ public class User {
         connected.add(user);
     }
 
+    public void addRequest(ConnectionNotification notification) {
+        requests.add(notification);
+    }
+
+    public void addReceived(ConnectionNotification notification) {
+        received.add(notification);
+    }
+
     public boolean isConnected(User user) {
         return connected.contains(user);
     }
+
 }

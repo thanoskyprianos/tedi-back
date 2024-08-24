@@ -23,7 +23,7 @@ public class Post {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @JsonView(View.AsProfessional.class)
+    @Lob @JsonView(View.AsProfessional.class)
     private String text;
 
     @CreationTimestamp

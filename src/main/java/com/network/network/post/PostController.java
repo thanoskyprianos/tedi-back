@@ -14,6 +14,7 @@ import com.network.network.user.service.UserService;
 import jakarta.annotation.Resource;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,8 +44,10 @@ public class PostController {
     @Resource
     private HelperService helperService;
 
+    // todo: use matrix factorization
     @GetMapping("/for")
     @JsonView(View.AsProfessional.class)
+    @PreAuthorize("#userId == principal.getId()")
     public ResponseEntity<?> getPostsForUser(@PathVariable int userId) {
         return ResponseEntity.ok(postResourceAssembler.toCollectionModel(postService.getAllPosts()));
     }
@@ -52,16 +55,22 @@ public class PostController {
     @GetMapping("")
     @JsonView(View.AsProfessional.class)
     public ResponseEntity<?> getUserPosts(@PathVariable int userId) {
-        User user = userService.getUserById(userId);
+        if(helperService.notAccessible(userId)) {
+            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
+        }
 
+        User user = userService.getUserById(userId);
         return ResponseEntity.ok(postResourceAssembler.toCollectionModel(user.getPosts()));
     }
 
     @GetMapping("/{postId}")
     @JsonView(View.AsProfessional.class)
     public ResponseEntity<?> getUserPost(@PathVariable int userId, @PathVariable int postId) {
-        Post post = helperService.getPostByPair(userId, postId);
+        if (helperService.notAccessible(userId)) {
+            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
+        }
 
+        Post post = helperService.getPostByPair(userId, postId);
         return ResponseEntity.ok(postResourceAssembler.toModel(post));
     }
 
@@ -99,6 +108,10 @@ public class PostController {
     @GetMapping("/liked")
     @JsonView(View.AsProfessional.class)
     public ResponseEntity<?> getUserLikedPosts(@PathVariable int userId) {
+        if(helperService.notAccessible(userId)) {
+            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
+        }
+
         User user = userService.getUserById(userId);
 
         return ResponseEntity.ok(postResourceAssembler.toCollectionModel(user.getLiked()));
@@ -110,6 +123,10 @@ public class PostController {
             @PathVariable int userId,
             @PathVariable int postId
     ) {
+        if (helperService.notAccessible(userId)) {
+            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
+        }
+
         Post post = helperService.getPostByPair(userId, postId);
 
         return ResponseEntity.ok(userResourceAssembler.toCollectionModel(post.getLikedBy()));
@@ -121,6 +138,10 @@ public class PostController {
             @PathVariable int userId,
             @PathVariable int postId
     ) {
+        if (helperService.notAccessible(userId)) {
+            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
+        }
+
         Post post = helperService.getPostByPair(userId, postId);
 
         return ResponseEntity.ok(commentResourceAssembler.toCollectionModel(post.getComments()));
@@ -133,6 +154,10 @@ public class PostController {
             @PathVariable int userId,
             @PathVariable int postId
     ) {
+        if (helperService.notAccessible(userId)) {
+            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
+        }
+
         User user = userService.getPrincipal();
         Post post = helperService.getPostByPair(userId, postId);
 
@@ -153,6 +178,10 @@ public class PostController {
             @PathVariable int postId,
             @RequestBody Comment comment
     ) {
+        if (helperService.notAccessible(userId)) {
+            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
+        }
+
         User user = userService.getPrincipal();
         Post post = helperService.getPostByPair(userId, postId);
 

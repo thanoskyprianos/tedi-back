@@ -1,6 +1,7 @@
 package com.network.network.user;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.network.network.misc.HelperService;
 import com.network.network.misc.View;
 import com.network.network.user.exception.DuplicateEmailException;
 import com.network.network.user.repr.LoginRequest;
@@ -12,6 +13,7 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -27,6 +29,9 @@ import java.util.Map;
 @RestController
 @RequestMapping(value = "/users", produces = "application/hal+json")
 public class UserController {
+    @Resource
+    private HelperService helperService;
+
     @Resource
     private UserService userService;
 
@@ -57,6 +62,17 @@ public class UserController {
     @JsonView(View.AsProfessional.class)
     public List<User> likeUser(@RequestParam String fullName) {
         return userRepository.findByNameLike(fullName);
+    }
+
+    @GetMapping("/{id}/connections")
+    @JsonView(View.AsProfessional.class)
+    public ResponseEntity<?> getConnections(@PathVariable int id) {
+        if (helperService.notAccessible(id)) {
+            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
+        }
+
+        User user = userService.getUserById(id);
+        return ResponseEntity.ok(userResourceAssembler.toCollectionModel(user.getConnected()));
     }
 
     @PostMapping("/login")
@@ -133,48 +149,6 @@ public class UserController {
         User user = userService.getUserById(id);
 
         userService.updatePassword(user, newPassword);
-
-        return ResponseEntity.noContent().build();
-    }
-
-    @PutMapping("/{id}/credentials")
-    @JsonView(View.AsProfessional.class)
-    @PreAuthorize("#id == principal.getId()")
-    public ResponseEntity<?> updateCredentials(@PathVariable int id, @RequestBody LoginRequest loginRequest) {
-        User user = userService.getUserById(id);
-
-        if (loginRequest.getPassword() != null) {
-            userService.updatePassword(user, loginRequest.getPassword());
-        }
-
-        if (loginRequest.getEmail() != null) {
-            userService.updateEmail(user, loginRequest.getEmail());
-        }
-
-        return ResponseEntity.noContent().build();
-    }
-
-    // todo: move
-    @GetMapping("/{id}/friends")
-    @JsonView(View.AsProfessional.class)
-    public ResponseEntity<?> getFriends(@PathVariable int id) {
-        User user = userService.getUserById(id);
-
-        return ResponseEntity.ok(userResourceAssembler.toCollectionModel(user.getConnected()));
-    }
-
-    // todo: move
-    @JsonView(View.AsProfessional.class)
-    @PutMapping("/{id}/befriend/{friendId}")
-    public ResponseEntity<?> addFriend(@PathVariable int id, @PathVariable int friendId) {
-        User user = userService.getUserById(id);
-        User friend = userService.getUserById(friendId);
-
-        user.addConnected(friend);
-        friend.addConnected(user);
-
-        userService.updateUser(user);
-        userService.updateUser(friend);
 
         return ResponseEntity.noContent().build();
     }

@@ -32,4 +32,11 @@ public class HelperService {
 
         return commentService.getCommentByPost(commentId, post);
     }
+
+    public boolean notAccessible(int userId) {
+        User user = userService.getUserById(userId);
+        User principal = userService.getPrincipal();
+
+        return user != principal && !user.isConnected(principal);
+    }
 }

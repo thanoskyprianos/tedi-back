@@ -8,6 +8,7 @@ import com.network.network.security.jwt.JwtToken;
 import com.network.network.security.jwt.JwtTokenRepository;
 import com.network.network.security.jwt.JwtUtil;
 import com.network.network.user.User;
+import com.network.network.user.exception.DuplicateEmailException;
 import com.network.network.user.exception.LoginException;
 import com.network.network.user.exception.UserNotFoundException;
 import com.network.network.user.info.Info;
@@ -46,7 +47,6 @@ public class UserService {
     @Resource AuthenticationManager authenticationManager;
 
     @Resource PasswordEncoder passwordEncoder;
-
 
     @Value("${roles.names.admin}")
     String adminName;
@@ -134,6 +134,11 @@ public class UserService {
     }
 
     public void updateEmail(User user, String email) {
+        // check if email exists
+        if(userRepository.findByEmail(email).isPresent()) {
+            throw new DuplicateEmailException(email);
+        }
+
         user.setEmail(email);
         updateUser(user);
 
