@@ -84,11 +84,11 @@ public class User {
 //    private Set<Notification> notifications;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "sender")
+    @OneToMany(mappedBy = "sender", cascade = CascadeType.REMOVE)
     private List<ConnectionNotification> requests = new ArrayList<>();
 
     @JsonIgnore
-    @OneToMany(mappedBy = "receiver")
+    @OneToMany(mappedBy = "receiver", cascade = CascadeType.REMOVE)
     private List<ConnectionNotification> received = new ArrayList<>();
 
     @JsonIgnore
