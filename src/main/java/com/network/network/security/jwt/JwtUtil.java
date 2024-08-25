@@ -21,8 +21,11 @@ public class JwtUtil {
     @Value("${jwt.token.secret}")
     private String secret;
 
-    @Value("${jwt.token.expirationMs}")
-    private long expirationMs;
+    @Value("${jwt.token.accessTokenExpirationMs}")
+    private long accessTokenExpirationMs;
+
+    @Value("${jwt.token.refreshTokenExpirationMs}")
+    private long refreshTokenExpirationMs;
 
     public void invalidateAllTokens(User user) {
         user.getJwtTokens().forEach(jwtToken -> {
@@ -41,11 +44,19 @@ public class JwtUtil {
         return null;
     }
 
-    public String generateToken(String subject) {
+    public String generateAccessToken(String subject) {
+        return this.generateToken(subject, accessTokenExpirationMs);
+    }
+
+    public String generateRefreshToken(String subject) {
+        return this.generateToken(subject, refreshTokenExpirationMs);
+    }
+
+    private String generateToken(String subject, long expirationMs) {
         return Jwts.builder()
                 .subject(subject)
                 .issuedAt(new Date())
-                .expiration(new Date(new Date().getTime() + this.expirationMs))
+                .expiration(new Date(new Date().getTime() + expirationMs))
                 .signWith(secretKey())
                 .compact();
     }
@@ -69,7 +80,7 @@ public class JwtUtil {
                 .getTime();
     }
 
-    public boolean validateToken(String token) {
+    public JwtToken validateToken(String token) {
         JwtToken jwtToken;
         try {
             jwtToken = tokenRepository
@@ -77,7 +88,7 @@ public class JwtUtil {
                     .orElseThrow(() -> new Exception("Token not found"));
         }
         catch (Exception e) {
-            return false;
+            return null;
         }
 
         try {
@@ -92,14 +103,14 @@ public class JwtUtil {
             tokenRepository.save(jwtToken);
 
             System.out.println("Expired token");
-            return false;
+            return null;
         }
         catch (Exception e) {
             System.out.println(e.getMessage());
-            return false;
+            return null;
         }
 
-        return true;
+        return jwtToken;
     }
 
     private SecretKey secretKey() {

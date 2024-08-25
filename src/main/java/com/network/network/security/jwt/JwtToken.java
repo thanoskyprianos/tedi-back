@@ -15,6 +15,12 @@ public class JwtToken {
 
     private boolean invalid;
 
+    @Enumerated(EnumType.STRING)
+    @Column(updatable = false,
+            name = "`type`",
+            nullable = false)
+    private TokenType type;
+
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     @Column(updatable = false)

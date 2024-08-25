@@ -3,6 +3,7 @@ package com.network.network.user;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.network.network.misc.HelperService;
 import com.network.network.misc.View;
+import com.network.network.security.jwt.TokenRepr;
 import com.network.network.user.exception.DuplicateEmailException;
 import com.network.network.user.repr.LoginRequest;
 import com.network.network.user.repr.RegisterRequest;
@@ -43,6 +44,7 @@ public class UserController {
 
     @GetMapping("")
     @JsonView(View.AsProfessional.class)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getUsers() {
         List<User> users = userService.getAllUsers();
 
@@ -77,20 +79,13 @@ public class UserController {
 
     @PostMapping("/login")
     @JsonView(View.AsProfessional.class)
-    public ResponseEntity<?> login(
-            @RequestBody LoginRequest loginRequest,
-            HttpServletRequest request
-    ) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
         return ResponseEntity.ok(userResourceAssembler.toModel(userService.loginUser(loginRequest, request)));
     }
 
     @PostMapping("/register")
     @JsonView(View.AsProfessional.class)
-    public ResponseEntity<?> register(
-            @RequestBody RegisterRequest registerRequest,
-            HttpServletRequest request
-
-    ) {
+    public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest, HttpServletRequest request) {
         if (userService.userExistsByEmail(registerRequest.getEmail())) {
             throw new DuplicateEmailException(registerRequest.getEmail());
         }
@@ -110,8 +105,14 @@ public class UserController {
 
     @GetMapping("/logout/success")
     @JsonView(View.AsProfessional.class)
-    public ResponseEntity<?> logout() {
+    public ResponseEntity<?> logout(){
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/refresh")
+    @JsonView(View.AsProfessional.class)
+    public ResponseEntity<?> refresh(@RequestBody TokenRepr repr) throws Exception {
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.refreshToken(repr));
     }
 
     @GetMapping("/{id}")

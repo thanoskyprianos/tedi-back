@@ -1,8 +1,8 @@
 package com.network.network.security;
 
-import com.network.network.security.jwt.JwtToken;
-import com.network.network.security.jwt.JwtTokenRepository;
-import com.network.network.security.jwt.JwtUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.network.network.security.jwt.TokenRepr;
+import com.network.network.user.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,10 +14,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class LogoutService implements LogoutHandler {
     @Resource
-    private JwtUtil jwtUtil;
+    private ObjectMapper objectMapper;
 
     @Resource
-    JwtTokenRepository tokenRepository;
+    private UserService userService;
 
     @Override
     public void logout(
@@ -25,16 +25,12 @@ public class LogoutService implements LogoutHandler {
             HttpServletResponse response,
             Authentication authentication)
     {
-        String token = jwtUtil.extractToken(request);
-        if (token == null) {
-            return;
+        try {
+            userService.invalidateTokens(objectMapper.readValue(request.getInputStream(), TokenRepr.class));
+        } catch (Exception e) {
+            SecurityContextHolder.clearContext();
+        } finally {
+            SecurityContextHolder.clearContext();
         }
-
-        JwtToken jwtToken = tokenRepository.findById(token).orElse(null);
-        if (jwtToken == null) { return; }
-
-        jwtToken.setInvalid(true);
-        tokenRepository.save(jwtToken);
-        SecurityContextHolder.clearContext();
     }
 }
