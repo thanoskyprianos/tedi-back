@@ -29,19 +29,13 @@ public class PostResourceAssembler implements RepresentationModelAssembler<Post,
                 linkTo(methodOn(PostController.class).getUserPost(
                         entity.getUser().getId(),
                         entity.getId())).withSelfRel(),
-
-                linkTo(methodOn(PostController.class).likePost(entity.getUser().getId(),
-                        entity.getId())).withRel("like"),
-
                 linkTo(methodOn(PostController.class).likesForPost(
                         entity.getUser().getId(),
                         entity.getId())).withRel("likes"),
-
                 linkTo(methodOn(PostController.class).commentPost(
                         entity.getUser().getId(),
                         entity.getId(),
                         null)).withRel("comment"),
-
                 linkTo(methodOn(PostController.class).commentsForPost(
                         entity.getUser().getId(),
                         entity.getId())).withRel("comments"),
@@ -57,6 +51,18 @@ public class PostResourceAssembler implements RepresentationModelAssembler<Post,
                 linkTo(methodOn(PostMediaController.class)
                     .addMedia(entity.getUser().getId(), entity.getId(), null))
                     .withRel("add_media")
+            );
+        }
+
+        if (principal.getLiked().contains(entity)) {
+            model = model.add(
+                    linkTo(methodOn(PostController.class)
+                            .likePost(entity.getUser().getId(), entity.getId())).withRel("dislike")
+            );
+        } else {
+            model = model.add(
+                    linkTo(methodOn(PostController.class)
+                            .likePost(entity.getUser().getId(), entity.getId())).withRel("like")
             );
         }
 

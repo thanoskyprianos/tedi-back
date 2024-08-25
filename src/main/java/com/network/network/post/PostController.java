@@ -161,8 +161,13 @@ public class PostController {
         User user = userService.getPrincipal();
         Post post = helperService.getPostByPair(userId, postId);
 
-        user.addLiked(post);
-        post.addLikedBy(user);
+        if (user.getLiked().contains(post)) {
+            user.getLiked().remove(post);
+            post.getLikedBy().remove(user);
+        } else {
+            user.addLiked(post);
+            post.addLikedBy(user);
+        }
 
         postService.savePost(post);
         userService.updateUser(user);
