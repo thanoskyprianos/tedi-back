@@ -11,13 +11,19 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+
+import java.io.FileNotFoundException;
+import java.sql.SQLException;
 import java.util.Map;
 
 @RestControllerAdvice
 public class MiscAdvice {
 
-    @ExceptionHandler(NoResourceFoundException.class)
-    public ResponseEntity<?> handleNoResourceFoundException(NoResourceFoundException e) {
+    @ExceptionHandler({
+            NoResourceFoundException.class,
+            FileNotFoundException.class
+    })
+    public ResponseEntity<?> handleNoResourceFoundException(Exception e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", e.getMessage()));
     }
 
@@ -44,9 +50,9 @@ public class MiscAdvice {
         return ResponseEntity.badRequest().build();
     }
 
-//    @ExceptionHandler(SQLException.class)
-//    public ResponseEntity<?> handleSQLException(SQLException e) {
-//        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-//    }
+    @ExceptionHandler(SQLException.class)
+    public ResponseEntity<?> handleSQLException(SQLException e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
 
 }
