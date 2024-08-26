@@ -50,10 +50,16 @@ public class UserResourceAssembler implements RepresentationModelAssembler<User,
                     linkTo(methodOn(UserController.class)
                             .getConnections(entity.getId())).withRel("connections"),
                     linkTo(methodOn(ConnectionController.class)
-                            .getSent(entity.getId())).withRel("sent"),
-                    linkTo(methodOn(ConnectionController.class)
-                            .getReceived(entity.getId())).withRel("received")
+                            .getSent(entity.getId())).withRel("sent")
             );
+
+            // check if there are friend requests
+            if (!entity.getReceived().isEmpty()) {
+                entityModel.add(
+                        linkTo(methodOn(ConnectionController.class)
+                                .getReceived(entity.getId())).withRel("received")
+                );
+            }
         } else if (principal.isConnected(entity)) {
             entityModel.add(
                     linkTo(methodOn(PostController.class)

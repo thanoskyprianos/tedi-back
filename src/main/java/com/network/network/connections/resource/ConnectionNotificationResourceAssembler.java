@@ -3,6 +3,7 @@ package com.network.network.connections.resource;
 import com.network.network.connections.ConnectionController;
 import com.network.network.connections.ConnectionNotification;
 import com.network.network.user.User;
+import com.network.network.user.UserController;
 import com.network.network.user.service.UserService;
 import jakarta.annotation.Resource;
 import lombok.NonNull;
@@ -22,7 +23,10 @@ public class ConnectionNotificationResourceAssembler implements RepresentationMo
     public @NonNull EntityModel<ConnectionNotification> toModel(@NonNull ConnectionNotification entity) {
         User principal = userService.getPrincipal();
 
-        EntityModel<ConnectionNotification> model = EntityModel.of(entity);
+        EntityModel<ConnectionNotification> model = EntityModel.of(entity,
+                linkTo(methodOn(UserController.class).getUser(entity.getReceiver().getId())).withRel("receiver"),
+                linkTo(methodOn(UserController.class).getUser(entity.getSender().getId())).withRel("sender")
+        );
 
         if (entity.getReceiver() == principal) {
             model.add(
