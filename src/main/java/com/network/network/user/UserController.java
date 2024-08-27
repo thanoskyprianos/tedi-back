@@ -160,4 +160,10 @@ public class UserController {
         userService.saveUser(user);
         return user;
     }
+
+    @GetMapping("search")
+    public List<user> searchBar(@RequestParam String name) {
+        return userRepository.findByNameLike(name);
+    }
+    
 }
