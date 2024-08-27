@@ -23,6 +23,15 @@ public class Post {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    // either true or false
+    @Column(nullable = false)
+    @JsonView(View.AsProfessional.class)
+    private boolean isPost;
+
+    @Column(nullable = false)
+    @JsonView(View.AsProfessional.class)
+    private boolean isJobOffer;
+
     @Column(columnDefinition = "TEXT")
     @JsonView(View.AsProfessional.class)
     private String text;
