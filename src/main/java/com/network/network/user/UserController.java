@@ -60,11 +60,7 @@ public class UserController {
         return ResponseEntity.ok(userResourceAssembler.toModel(user));
     }
 
-    @GetMapping("/like")
-    @JsonView(View.AsProfessional.class)
-    public List<User> likeUser(@RequestParam String fullName) {
-        return userRepository.findByNameLike(fullName);
-    }
+
 
     @GetMapping("/{id}/connections")
     @JsonView(View.AsProfessional.class)
@@ -162,6 +158,7 @@ public class UserController {
     }
 
     @GetMapping("/search")
+    @JsonView(View.AsProfessional.class)
     public List<User> searchBar(@RequestParam String name) {
         return userRepository.findByNameLike(name);
     }
