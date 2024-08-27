@@ -161,9 +161,9 @@ public class UserController {
         return user;
     }
 
-    @GetMapping("search")
-    public List<user> searchBar(@RequestParam String name) {
+    @GetMapping("/search")
+    public List<User> searchBar(@RequestParam String name) {
         return userRepository.findByNameLike(name);
     }
-    
+
 }
