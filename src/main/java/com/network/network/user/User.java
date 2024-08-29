@@ -61,7 +61,7 @@ public class User {
     @JsonView(View.AsProfessional.class)
     private Role role;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JsonView(View.AsAdmin.class)
     @JsonIgnoreProperties({"connected", "posts", "liked", "comments", "info"})
     @JoinTable(name = "connections",

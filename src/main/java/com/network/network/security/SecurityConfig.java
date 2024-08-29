@@ -38,6 +38,7 @@ public class SecurityConfig {
             requests.requestMatchers("users/register").permitAll();
             requests.requestMatchers("users/logout").permitAll();
             requests.requestMatchers("users/logout/success").permitAll();
+            requests.requestMatchers("room/**").permitAll();
             requests.anyRequest().authenticated();
         });
 
