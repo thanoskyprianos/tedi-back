@@ -60,8 +60,6 @@ public class UserController {
         return ResponseEntity.ok(userResourceAssembler.toModel(user));
     }
 
-
-
     @GetMapping("/{id}/connections")
     @JsonView(View.AsProfessional.class)
     public ResponseEntity<?> getConnections(@PathVariable int id) {

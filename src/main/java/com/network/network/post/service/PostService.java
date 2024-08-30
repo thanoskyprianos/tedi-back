@@ -23,6 +23,10 @@ public class PostService {
                 .orElseThrow(() -> new PostNotFoundException(id));
     }
 
+    public List<Post> getJobOfferPosts() {
+        return postRepository.getAllByIsJobOfferIsTrue();
+    }
+
     public Post savePost(Post post) {
         return postRepository.save(post);
     }
@@ -35,4 +39,6 @@ public class PostService {
     public void removePost(Post post) {
         postRepository.delete(post);
     }
+
+
 }

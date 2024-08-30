@@ -20,6 +20,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping(value = "/users/{userId}/posts", produces = "application/hal+json")
 public class PostController {
@@ -61,6 +63,12 @@ public class PostController {
 
         User user = userService.getUserById(userId);
         return ResponseEntity.ok(postResourceAssembler.toCollectionModel(user.getPosts()));
+    }
+
+    @GetMapping("/job-offers")
+    @JsonView(View.AsProfessional.class)
+    public ResponseEntity<?> getJobOfferPosts(@PathVariable int userId) {
+        return ResponseEntity.ok(postResourceAssembler.toCollectionModel(postService.getJobOfferPosts()));
     }
 
     @GetMapping("/{postId}")
