@@ -36,6 +36,10 @@ public class Post {
     @JsonView(View.AsProfessional.class)
     private String text;
 
+    @Column(columnDefinition = "TEXT")
+    @JsonView(View.AsProfessional.class)
+    private String skills;
+
     @CreationTimestamp
     @Column(updatable=false)
     @JsonView(View.AsAdmin.class)
