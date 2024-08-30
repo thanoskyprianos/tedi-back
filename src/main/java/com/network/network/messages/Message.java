@@ -19,6 +19,7 @@ public class Message {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @Column(columnDefinition = "TEXT")
     private String message;
 
     @ManyToOne

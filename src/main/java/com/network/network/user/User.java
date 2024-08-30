@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.network.network.comment.Comment;
 import com.network.network.media.Media;
+import com.network.network.messages.Message;
 import com.network.network.misc.View;
 import com.network.network.connections.ConnectionNotification;
 import com.network.network.post.Post;
@@ -81,10 +82,6 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private List<Comment> comments = new ArrayList<>();
 
-//    @JsonView(View.AsAdmin.class)
-//    @OneToMany(mappedBy = "of")
-//    private Set<Notification> notifications;
-
     @JsonIgnore
     @OneToMany(mappedBy = "sender", cascade = CascadeType.REMOVE)
     private List<ConnectionNotification> requests = new ArrayList<>();
@@ -92,6 +89,14 @@ public class User {
     @JsonIgnore
     @OneToMany(mappedBy = "receiver", cascade = CascadeType.REMOVE)
     private List<ConnectionNotification> received = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "sender",cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
+    private List<Message> sentMessages = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "recipient", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
+    private List<Message> receivedMessages = new ArrayList<>();
 
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
@@ -123,6 +128,8 @@ public class User {
         this.requests = new ArrayList<>(user.getRequests());
         this.received = new ArrayList<>(user.getReceived());
         this.jwtTokens = new ArrayList<>(user.getJwtTokens());
+        this.sentMessages = new ArrayList<>(user.getSentMessages());
+        this.receivedMessages = new ArrayList<>(user.getReceivedMessages());
     }
 
     public void addToken(JwtToken jwtToken) {
@@ -157,4 +164,11 @@ public class User {
         return connected.contains(user);
     }
 
+    public void addSentMessage(Message message) {
+        sentMessages.add(message);
+    }
+
+    public void addReceivedMessage(Message message) {
+        receivedMessages.add(message);
+    }
 }

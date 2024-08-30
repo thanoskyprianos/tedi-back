@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,15 +27,22 @@ public class MessagingController {
     @Resource
     private MessageService messageService;
 
+    @Transactional
     @MessageMapping("/message")
     public void sendMessage(@Payload MessageRepr message, Principal principal) {
         User sender = userService.getUserByEmail(principal.getName());
         User recipient = userService.getUserById(message.getRecipient());
 
-        if (recipient.isConnected(sender)) return;
+        if (!recipient.isConnected(sender)) return;
 
         Message messageObj = new Message(message.getMessage(), sender, recipient);
         messageService.saveMessage(messageObj);
+
+        sender.addSentMessage(messageObj);
+        recipient.addReceivedMessage(messageObj);
+
+        userService.updateUser(sender);
+        userService.updateUser(recipient);
 
         messagingTemplate.convertAndSendToUser(sender.getEmail(), "/queue", messageObj);
         messagingTemplate.convertAndSendToUser(recipient.getEmail(), "/queue", messageObj);

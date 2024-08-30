@@ -57,6 +57,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     String authHeader = accessor.getFirstNativeHeader("Authorization");
                     String token = authHeader.substring(7);
 
+                    if (jwtUtil.validateToken(token) == null) {
+                        throw new RuntimeException("Invalid token");
+                    }
+
                     String username = jwtUtil.extractUsername(token);
 
                     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
