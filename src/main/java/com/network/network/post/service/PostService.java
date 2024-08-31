@@ -7,6 +7,7 @@ import com.network.network.user.User;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -25,6 +26,13 @@ public class PostService {
 
     public List<Post> getJobOfferPosts() {
         return postRepository.getAllByIsJobOfferIsTrue();
+    }
+
+    public List<String> getSeparatedSkills(String skills) {
+        if (skills != null) {
+            return Arrays.asList(skills.split(","));
+        }
+        return List.of();
     }
 
     public Post savePost(Post post) {
