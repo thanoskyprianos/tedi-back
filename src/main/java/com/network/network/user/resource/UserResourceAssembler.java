@@ -6,6 +6,7 @@ import com.network.network.connections.ConnectionNotification;
 import com.network.network.connections.service.ConnectionService;
 import com.network.network.media.UserMediaController;
 import com.network.network.misc.View;
+import com.network.network.notification.controllers.ActivityController;
 import com.network.network.post.PostController;
 import com.network.network.user.User;
 import com.network.network.user.UserController;
@@ -60,6 +61,31 @@ public class UserResourceAssembler implements RepresentationModelAssembler<User,
                                 .getReceived(entity.getId())).withRel("received")
                 );
             }
+
+            // check if there are like notifications
+            if (!entity.getReceivedLikeNotifications().isEmpty()) {
+                entityModel.add(
+                        linkTo(methodOn(ActivityController.class)
+                                .getLikeActivities(entity.getId())).withRel("like_activity")
+                );
+            }
+
+            // check if there are comment notifications
+            if (!entity.getReceivedCommentNotifications().isEmpty()) {
+                entityModel.add(
+                        linkTo(methodOn(ActivityController.class)
+                                .getCommentActivities(entity.getId())).withRel("comment_activity")
+                );
+            }
+
+            // check if there are job interest notifications
+            if (!entity.getReceivedInterestNotifications().isEmpty()) {
+                entityModel.add(
+                        linkTo(methodOn(ActivityController.class)
+                                .getInterestActivities(entity.getId())).withRel("interest_activity")
+                );
+            }
+
         } else if (principal.isConnected(entity)) {
             entityModel.add(
                     linkTo(methodOn(PostController.class)

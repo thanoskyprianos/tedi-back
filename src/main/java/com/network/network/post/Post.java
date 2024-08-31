@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.network.network.comment.Comment;
 import com.network.network.media.Media;
 import com.network.network.misc.View;
+import com.network.network.notification.modules.InterestNotification;
+import com.network.network.notification.modules.LikeNotification;
 import com.network.network.user.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -73,6 +75,14 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
     private List<Comment> comments = new ArrayList<>();
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
+    private List<LikeNotification> likeNotifications = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
+    private List<InterestNotification> interestNotifications = new ArrayList<>();
+
     public Post(String text) { this.text = text; }
 
     public void addMedia(Media media) {
@@ -85,5 +95,13 @@ public class Post {
 
     public void addComment(Comment comment) {
         comments.add(comment);
+    }
+
+    public void addLikedNotification(LikeNotification likedNotification) {
+        likeNotifications.add(likedNotification);
+    }
+
+    public void addInterestNotification(InterestNotification interestNotification) {
+        interestNotifications.add(interestNotification);
     }
 }

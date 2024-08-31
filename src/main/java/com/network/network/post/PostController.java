@@ -6,6 +6,12 @@ import com.network.network.comment.resource.CommentResourceAssembler;
 import com.network.network.comment.service.CommentService;
 import com.network.network.misc.HelperService;
 import com.network.network.misc.View;
+import com.network.network.notification.modules.CommentNotification;
+import com.network.network.notification.modules.InterestNotification;
+import com.network.network.notification.modules.LikeNotification;
+import com.network.network.notification.resource.CommentNotificationRepository;
+import com.network.network.notification.resource.InterestNotificationRepository;
+import com.network.network.notification.resource.LikeNotificationRepository;
 import com.network.network.post.resource.PostResourceAssembler;
 import com.network.network.post.service.PostService;
 import com.network.network.user.User;
@@ -20,6 +26,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Comparator;
 import java.util.List;
 
 @RestController
@@ -45,6 +52,15 @@ public class PostController {
 
     @Resource
     private HelperService helperService;
+
+    @Resource
+    private LikeNotificationRepository likeNotificationRepository;
+
+    @Resource
+    private InterestNotificationRepository interestNotificationRepository;
+
+    @Resource
+    private CommentNotificationRepository commentNotificationRepository;
 
     // todo: use matrix factorization
     @GetMapping("/for")
@@ -152,7 +168,10 @@ public class PostController {
 
         Post post = helperService.getPostByPair(userId, postId);
 
-        return ResponseEntity.ok(commentResourceAssembler.toCollectionModel(post.getComments()));
+        List<Comment> comments = post.getComments();
+        comments.sort(Comparator.comparing(Comment::getCreated).reversed());
+
+        return ResponseEntity.ok(commentResourceAssembler.toCollectionModel(comments));
     }
 
     @Transactional
@@ -172,13 +191,45 @@ public class PostController {
         if (user.getLiked().contains(post)) {
             user.getLiked().remove(post);
             post.getLikedBy().remove(user);
+
+            if (!post.isJobOffer()) {
+                likeNotificationRepository
+                        .findByPostAndSenderAndReceiver(post, user, post.getUser())
+                        .ifPresent(likeNotificationRepository::delete);
+            } else {
+                interestNotificationRepository
+                        .findByPostAndSenderAndReceiver(post, user, post.getUser())
+                        .ifPresent(interestNotificationRepository::delete);
+            }
+
         } else {
             user.addLiked(post);
             post.addLikedBy(user);
+
+            if (!post.isJobOffer()) {
+                LikeNotification likeNotification
+                        = new LikeNotification(post, user, post.getUser());
+
+                likeNotificationRepository.save(likeNotification);
+
+                user.addSentLikeNotification(likeNotification);
+                post.getUser().addReceivedLikeNotification(likeNotification);
+                post.addLikedNotification(likeNotification);
+            } else {
+                InterestNotification interestNotification
+                        = new InterestNotification(post, user, post.getUser());
+
+                interestNotificationRepository.save(interestNotification);
+
+                user.addSentInterestNotification(interestNotification);
+                post.getUser().addReceivedInterestNotification(interestNotification);
+                post.addInterestNotification(interestNotification);
+            }
         }
 
-        postService.savePost(post);
         userService.updateUser(user);
+        userService.updateUser(post.getUser());
+        postService.savePost(post);
 
         return ResponseEntity.noContent().build();
     }
@@ -203,6 +254,15 @@ public class PostController {
 
         comment.setUser(user);
         comment.setPost(post);
+
+        CommentNotification commentNotification =
+                new CommentNotification(comment, user, post.getUser());
+
+        user.addSentCommentNotification(commentNotification);
+        post.getUser().addReceivedCommentNotification(commentNotification);
+        comment.addCommentNotification(commentNotification);
+
+        commentNotificationRepository.save(commentNotification);
 
         postService.savePost(post);
         userService.updateUser(user);

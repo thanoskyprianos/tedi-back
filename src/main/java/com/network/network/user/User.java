@@ -8,6 +8,9 @@ import com.network.network.media.Media;
 import com.network.network.messages.Message;
 import com.network.network.misc.View;
 import com.network.network.connections.ConnectionNotification;
+import com.network.network.notification.modules.CommentNotification;
+import com.network.network.notification.modules.InterestNotification;
+import com.network.network.notification.modules.LikeNotification;
 import com.network.network.post.Post;
 import com.network.network.role.Role;
 import com.network.network.security.jwt.JwtToken;
@@ -99,6 +102,30 @@ public class User {
     private List<Message> receivedMessages = new ArrayList<>();
 
     @JsonIgnore
+    @OneToMany(mappedBy = "sender", cascade = CascadeType.REMOVE)
+    private List<LikeNotification> sentLikeNotifications = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "receiver", cascade = CascadeType.REMOVE)
+    private List<LikeNotification> receivedLikeNotifications = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "sender", cascade = CascadeType.REMOVE)
+    private List<CommentNotification> sentCommentNotifications = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "receiver", cascade = CascadeType.REMOVE)
+    private List<CommentNotification> receivedCommentNotifications = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "sender", cascade = CascadeType.REMOVE)
+    private List<InterestNotification> sentInterestNotifications = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "receiver", cascade = CascadeType.REMOVE)
+    private List<InterestNotification> receivedInterestNotifications = new ArrayList<>();
+
+    @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     List<JwtToken> jwtTokens = new ArrayList<>();
 
@@ -130,6 +157,12 @@ public class User {
         this.jwtTokens = new ArrayList<>(user.getJwtTokens());
         this.sentMessages = new ArrayList<>(user.getSentMessages());
         this.receivedMessages = new ArrayList<>(user.getReceivedMessages());
+        this.sentLikeNotifications = new ArrayList<>(user.getSentLikeNotifications());
+        this.receivedLikeNotifications = new ArrayList<>(user.getReceivedLikeNotifications());
+        this.sentCommentNotifications = new ArrayList<>(user.getSentCommentNotifications());
+        this.receivedCommentNotifications = new ArrayList<>(user.getReceivedCommentNotifications());
+        this.sentInterestNotifications = new ArrayList<>(user.getSentInterestNotifications());
+        this.receivedInterestNotifications = new ArrayList<>(user.getReceivedInterestNotifications());
     }
 
     public void addToken(JwtToken jwtToken) {
@@ -170,5 +203,29 @@ public class User {
 
     public void addReceivedMessage(Message message) {
         receivedMessages.add(message);
+    }
+
+    public void addSentLikeNotification(LikeNotification notification) {
+        sentLikeNotifications.add(notification);
+    }
+
+    public void addReceivedLikeNotification(LikeNotification notification) {
+        receivedLikeNotifications.add(notification);
+    }
+
+    public void addSentCommentNotification(CommentNotification notification) {
+        sentCommentNotifications.add(notification);
+    }
+
+    public void addReceivedCommentNotification(CommentNotification notification) {
+        receivedCommentNotifications.add(notification);
+    }
+
+    public void addSentInterestNotification(InterestNotification notification) {
+        sentInterestNotifications.add(notification);
+    }
+
+    public void addReceivedInterestNotification(InterestNotification notification) {
+        receivedInterestNotifications.add(notification);
     }
 }

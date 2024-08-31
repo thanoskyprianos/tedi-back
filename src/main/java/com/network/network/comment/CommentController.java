@@ -8,6 +8,7 @@ import com.network.network.misc.View;
 import jakarta.annotation.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -34,9 +35,10 @@ public class CommentController {
         return ResponseEntity.ok(commentResourceAssembler.toModel(comment));
     }
 
-    @PreAuthorize("#userId == principal.getId() || hasRole('ADMIN')")
+    @Transactional
     @DeleteMapping("/{commentId}")
     @JsonView(View.AsProfessional.class)
+    @PreAuthorize("#userId == principal.getId() || hasRole('ADMIN')")
     public ResponseEntity<?> deleteComment(
             @PathVariable int userId,
             @PathVariable int postId,
