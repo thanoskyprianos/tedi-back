@@ -24,12 +24,12 @@ public class Message {
 
     @ManyToOne
     @JsonView(View.AsProfessional.class)
-    @JsonIgnoreProperties({"comments", "posts", "liked", "info", "role", "connected"})
+    @JsonIgnoreProperties({"comments", "posts", "liked", "info", "connected"})
     private User sender;
 
     @ManyToOne
     @JsonView(View.AsProfessional.class)
-    @JsonIgnoreProperties({"comments", "posts", "liked", "info", "role", "connected"})
+    @JsonIgnoreProperties({"comments", "posts", "liked", "info", "connected"})
     private User recipient;
 
     @CreationTimestamp

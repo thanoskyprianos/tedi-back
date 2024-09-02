@@ -32,14 +32,13 @@ public class Comment {
     @JsonView(View.AsProfessional.class)
     private Date created;
 
-    @JsonView(View.AsAdmin.class)
-    @JsonIgnoreProperties({"comments", "posts", "liked", "info", "role", "connected"})
+    @JsonIgnoreProperties({"comments", "posts", "liked", "info", "connected"})
     @ManyToOne @JoinColumn(name = "user")
     private User user;
 
-    @JsonIgnore
     @JsonView(View.AsAdmin.class)
     @ManyToOne @JoinColumn(name = "post")
+    @JsonIgnoreProperties({"likedBy", "comments"})
     private Post post;
 
     @JsonIgnore

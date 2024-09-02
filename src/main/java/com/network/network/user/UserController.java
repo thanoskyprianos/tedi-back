@@ -39,15 +39,6 @@ public class UserController {
     @Resource
     private UserRepository userRepository;
 
-    @GetMapping("")
-    @JsonView(View.AsProfessional.class)
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> getUsers() {
-        List<User> users = userService.getAllUsers();
-
-        return ResponseEntity.ok(userResourceAssembler.toCollectionModel(users));
-    }
-
     @GetMapping("/self")
     @JsonView(View.AsProfessional.class)
     public ResponseEntity<?> getSelf() {

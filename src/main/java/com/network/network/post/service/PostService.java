@@ -4,6 +4,7 @@ import com.network.network.post.Post;
 import com.network.network.post.exception.PostNotFoundException;
 import com.network.network.post.resource.PostRepository;
 import com.network.network.user.User;
+import com.network.network.user.info.Info;
 import com.network.network.user.service.UserService;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,10 +51,14 @@ public class PostService {
     }
 
     public List<String> skillsSepUser(User user) {
-        String skills = user.getInfo().getSkills();
-        if (skills != null && !skills.isEmpty()) {
-            return Arrays.asList(skills.split(","));
+        Info info = user.getInfo();
+        if (info != null) {
+            String skills = user.getInfo().getSkills();
+            if (skills != null && !skills.isEmpty()) {
+                return Arrays.asList(skills.split(","));
+            }
         }
+
         return List.of();
     }
 

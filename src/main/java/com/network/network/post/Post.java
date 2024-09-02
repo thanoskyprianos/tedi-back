@@ -44,7 +44,7 @@ public class Post {
 
     @CreationTimestamp
     @Column(updatable=false)
-    @JsonView(View.AsAdmin.class)
+    @JsonView(View.AsProfessional.class)
     @Temporal(TemporalType.TIMESTAMP)
     private Date created;
 
@@ -58,12 +58,12 @@ public class Post {
 
     @ManyToOne
     @JsonView(View.AsAdmin.class)
-    @JsonIgnoreProperties({"comments", "posts", "liked", "info", "role", "connected"})
+    @JsonIgnoreProperties({"comments", "posts", "liked", "info", "connected"})
     private User user;
 
     @ManyToMany
     @JsonView(View.AsAdmin.class)
-    @JsonIgnoreProperties({"comments", "posts", "liked", "info", "role", "connected"})
+    @JsonIgnoreProperties({"comments", "posts", "liked", "info", "connected"})
     @JoinTable(name = "post_likes",
         joinColumns = @JoinColumn(name = "post"),
         inverseJoinColumns = @JoinColumn(name = "user"),
@@ -73,6 +73,7 @@ public class Post {
 
     @JsonView(View.AsAdmin.class)
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
+    @JsonIgnoreProperties("post")
     private List<Comment> comments = new ArrayList<>();
 
     @JsonIgnore

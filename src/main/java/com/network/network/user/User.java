@@ -22,10 +22,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Getter @Setter
@@ -75,14 +72,17 @@ public class User {
 
     @JsonView(View.AsAdmin.class)
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
+    @JsonIgnoreProperties("user")
     private List<Post> posts = new ArrayList<>();
 
     @JsonView(View.AsAdmin.class)
     @ManyToMany(mappedBy = "likedBy")
+    @JsonIgnoreProperties({"likedBy", "comments"})
     private Set<Post> liked = new HashSet<>();
 
     @JsonView(View.AsAdmin.class)
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
+    @JsonIgnoreProperties("user")
     private List<Comment> comments = new ArrayList<>();
 
     @JsonIgnore
