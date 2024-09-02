@@ -84,14 +84,7 @@ public class PostController {
     @GetMapping("/job-offers")
     @JsonView(View.AsProfessional.class)
     public ResponseEntity<?> getJobOfferPosts(@PathVariable int userId) {
-        return ResponseEntity.ok(postResourceAssembler.toCollectionModel(postService.getJobOfferPosts()));
-    }
-
-    @GetMapping("/job-offers/skills")
-    @JsonView(View.AsProfessional.class)
-    public ResponseEntity<List<String>> getJobOfferSkills(@PathVariable int userId, @RequestParam String skills) {
-        List<String> separatedSkills = postService.getSeparatedSkills(skills);
-        return ResponseEntity.ok(separatedSkills);
+        return ResponseEntity.ok(postResourceAssembler.toCollectionModel(postService.getJobOffersUserBased(userId)));
     }
 
     @GetMapping("/{postId}")
