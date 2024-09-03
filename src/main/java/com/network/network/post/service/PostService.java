@@ -7,7 +7,7 @@ import com.network.network.user.User;
 import com.network.network.user.info.Info;
 import com.network.network.user.service.UserService;
 import jakarta.annotation.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -19,11 +19,26 @@ import java.util.stream.Collectors;
 public class PostService {
     @Resource
     private PostRepository postRepository;
-    @Autowired
+
+    @Resource
     private UserService userService;
 
-    public List<Post> getAllPosts() {
-        return postRepository.findAll();
+    @Value("${post.page.size}")
+    private int pageSize;
+
+    public List<Post> getAllPostsFor(User user, int page) throws IllegalArgumentException {
+        if (page <= 0) {
+            throw new IllegalArgumentException("Page should be positive");
+        }
+
+        List<Post> posts = postRepository.findAll().stream().filter(post ->
+                post.isPost() &&
+                post.getUser() != user &&
+                (post.getUser().isConnected(user) ||
+                user.getConnected().stream().anyMatch(connection -> connection.isConnected(post.getUser()))))
+           .collect(Collectors.toList());
+
+        return posts.subList((page - 1) * pageSize, Math.min(page * pageSize, posts.size()));
     }
 
     public Post getPost(int id) {
@@ -36,18 +51,22 @@ public class PostService {
         return postRepository.getAllByIsJobOfferIsTrue();
     } */
 
-    public List<Post> getJobOffersUserBased(int userId) {
+    public List<Post> getJobOffersUserBased(int userId, int page) {
+        if (page <= 0) {
+            throw new IllegalArgumentException("Page should be positive");
+        }
+
         List<Post> allJobOfferPosts = postRepository.getAllByIsJobOfferIsTrue();
 
         User user = userService.getUserById(userId);
-        System.out.println(allJobOfferPosts);
         List<String> userSkills = skillsSepUser(user);
-        System.out.println(userSkills);
 
         // for every job offer find matching score
-        return allJobOfferPosts.stream()
+        List<Post> selected = allJobOfferPosts.stream()
         .sorted(Comparator.comparingInt(jobOff -> matchPoints(userSkills, skillsSepPost((Post) jobOff))).reversed())
-        .collect(Collectors.toList());
+        .toList();
+
+        return selected.subList((page - 1) * pageSize, Math.min(page * pageSize, selected.size()));
     }
 
     public List<String> skillsSepUser(User user) {

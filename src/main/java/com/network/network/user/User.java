@@ -44,7 +44,10 @@ public class User {
     @JsonView(View.AsProfessional.class)
     private String email;
 
-    @JsonIgnore
+    // JsonIgnore was getting ignored by ObjectMapper
+    // when reading mock users, so we replace it with an
+    // Inaccessible view to fix this issue
+    @JsonView(View.Inaccessible.class)
     private String password;
 
     @JsonView(View.AsProfessional.class)

@@ -18,6 +18,8 @@ import com.network.network.user.User;
 import com.network.network.user.resource.UserResourceAssembler;
 import com.network.network.user.service.UserService;
 import jakarta.annotation.Resource;
+import jakarta.websocket.server.PathParam;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.HttpStatus;
@@ -66,8 +68,10 @@ public class PostController {
     @GetMapping("/for")
     @JsonView(View.AsProfessional.class)
     @PreAuthorize("#userId == principal.getId()")
-    public ResponseEntity<?> getPostsForUser(@PathVariable int userId) {
-        return ResponseEntity.ok(postResourceAssembler.toCollectionModel(postService.getAllPosts()));
+    public ResponseEntity<?> getPostsForUser(@PathVariable int userId, @PathParam("page") int page) throws IllegalArgumentException {
+        User user = userService.getUserById(userId);
+
+        return ResponseEntity.ok(postResourceAssembler.toCollectionModel(postService.getAllPostsFor(user, page)));
     }
 
     @GetMapping("")
@@ -78,13 +82,15 @@ public class PostController {
         }
 
         User user = userService.getUserById(userId);
-        return ResponseEntity.ok(postResourceAssembler.toCollectionModel(user.getPosts()));
+        List<Post> posts = user.getPosts();
+
+        return ResponseEntity.ok(postResourceAssembler.toCollectionModel(posts));
     }
 
     @GetMapping("/job-offers")
     @JsonView(View.AsProfessional.class)
-    public ResponseEntity<?> getJobOfferPosts(@PathVariable int userId) {
-        return ResponseEntity.ok(postResourceAssembler.toCollectionModel(postService.getJobOffersUserBased(userId)));
+    public ResponseEntity<?> getJobOfferPosts(@PathVariable int userId, @PathParam("page") int page) {
+        return ResponseEntity.ok(postResourceAssembler.toCollectionModel(postService.getJobOffersUserBased(userId, page)));
     }
 
     @GetMapping("/{postId}")
