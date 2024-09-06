@@ -39,7 +39,8 @@ public class PostResourceAssembler implements RepresentationModelAssembler<Post,
                 linkTo(methodOn(PostController.class).commentsForPost(
                         entity.getUser().getId(),
                         entity.getId())).withRel("comments"),
-                linkTo(methodOn(UserController.class).getUser(entity.getUser().getId())).withRel("author")
+                linkTo(methodOn(UserController.class).getUser(entity.getUser().getId())).withRel("author"),
+                linkTo(methodOn(PostController.class).viewPost(principal.getId(), entity.getId())).withRel("view")
         );
 
         // only if author requests post

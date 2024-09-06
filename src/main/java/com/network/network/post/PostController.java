@@ -96,10 +96,6 @@ public class PostController {
     @GetMapping("/{postId}")
     @JsonView(View.AsProfessional.class)
     public ResponseEntity<?> getUserPost(@PathVariable int userId, @PathVariable int postId) {
-        if (helperService.notAccessible(userId)) {
-            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
-        }
-
         Post post = helperService.getPostByPair(userId, postId);
         return ResponseEntity.ok(postResourceAssembler.toModel(post));
     }
