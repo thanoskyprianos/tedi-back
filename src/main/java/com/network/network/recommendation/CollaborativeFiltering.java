@@ -108,8 +108,11 @@ public class CollaborativeFiltering {
             User user = users.get(i);
             for (int j = 0; j < posts.size(); j++) {
                 Post post = posts.get(j);
+                recs[i][j] = 0;
 
-                recs[i][j] = post.getViewers().contains(user) ? 1 : 0;
+                // Most important : Skill Match Level.
+                recs[i][j] += 2 * post.getMatchLvl();
+                recs[i][j] += post.getViewers().contains(user) ? 2 : 0;
             }
         }
 

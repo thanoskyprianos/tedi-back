@@ -35,10 +35,6 @@ public class PostService {
                              .toList();
     }
 
-    public List<Post> getAllJobOffers() {
-        return postRepository.findAll().stream().filter(Post::isJobOffer).toList();
-    }
-
     public List<Post> getAllPostsFor(User user, int page) throws IllegalArgumentException {
         if (page <= 0) {
             throw new IllegalArgumentException("Page should be positive");
@@ -85,9 +81,10 @@ public class PostService {
     }
 
     // Job Offers section
-    /* public List<Post> getJobOfferPosts() {
-        return postRepository.getAllByIsJobOfferIsTrue();
-    } */
+    public List<Post> getAllJobOffers() {
+        return postRepository.findAll().stream()
+                .filter(Post::isJobOffer).toList();
+    }
 
     public List<Post> getJobOffersUserBased(int userId, int page) {
         if (page <= 0) {
@@ -101,6 +98,7 @@ public class PostService {
 
         // for every job offer find matching score
         List<Post> selected = allJobOfferPosts.stream()
+        .peek(post -> post.setMatchLvl(matchPoints(userSkills, skillsSepPost(post))))
         .sorted(Comparator.comparingInt(jobOff -> matchPoints(userSkills, skillsSepPost((Post) jobOff))).reversed())
         .toList();
 

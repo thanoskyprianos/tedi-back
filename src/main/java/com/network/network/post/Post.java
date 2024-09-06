@@ -43,6 +43,10 @@ public class Post {
     @JsonView(View.AsProfessional.class)
     private String skills;
 
+    @Setter
+    @Column(nullable = false)
+    private int matchLvl = 0;
+
     @CreationTimestamp
     @Column(updatable=false)
     @JsonView(View.AsProfessional.class)
@@ -127,4 +131,5 @@ public class Post {
     public void addRecommendation(Recommendation recommendation) {
         recommendations.add(recommendation);
     }
+
 }
