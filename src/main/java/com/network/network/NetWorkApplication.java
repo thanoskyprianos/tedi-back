@@ -108,7 +108,7 @@ public class NetWorkApplication {
     public void addMockUsers() {
         try {
             Arrays.stream(objectMapper.readValue(mockUsers, User[].class)).toList().forEach(user -> {
-                System.out.print(ANSI_RED + "ADDING USER: " + ANSI_RESET + user);
+                System.out.println(ANSI_RED + "ADDING USER: " + ANSI_RESET + user);
                 userService.saveUser(user);
             });
         } catch (Exception e) {

@@ -69,7 +69,11 @@ public class UserService {
     }
 
     public List<User> getAllUsers() {
-        return userRepository.findAll();
+        return userRepository
+                .findAll()
+                .stream()
+                .filter(user -> user.getRole().getName().equals(professionalName))
+                .toList();
     }
 
     public boolean userExistsByEmail(String email) {

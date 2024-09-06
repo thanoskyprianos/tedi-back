@@ -8,6 +8,7 @@ import com.network.network.media.Media;
 import com.network.network.misc.View;
 import com.network.network.notification.modules.InterestNotification;
 import com.network.network.notification.modules.LikeNotification;
+import com.network.network.recommendation.Recommendation;
 import com.network.network.user.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -61,7 +62,7 @@ public class Post {
     @JsonIgnoreProperties({"comments", "posts", "liked", "info", "connected"})
     private User user;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JsonView(View.AsAdmin.class)
     @JsonIgnoreProperties({"comments", "posts", "liked", "info", "connected"})
     @JoinTable(name = "post_likes",
@@ -72,7 +73,7 @@ public class Post {
     private Set<User> likedBy = new HashSet<>();
 
     @JsonView(View.AsAdmin.class)
-    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
     @JsonIgnoreProperties("post")
     private List<Comment> comments = new ArrayList<>();
 
@@ -83,6 +84,19 @@ public class Post {
     @JsonIgnore
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
     private List<InterestNotification> interestNotifications = new ArrayList<>();
+
+    @JsonIgnore
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "post_views",
+        joinColumns = @JoinColumn(name = "post"),
+        inverseJoinColumns = @JoinColumn(name = "user"),
+        uniqueConstraints = @UniqueConstraint(columnNames = {"post", "user"})
+    )
+    private Set<User> viewers = new HashSet<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
+    private List<Recommendation> recommendations = new ArrayList<>();
 
     public Post(String text) { this.text = text; }
 
@@ -104,5 +118,13 @@ public class Post {
 
     public void addInterestNotification(InterestNotification interestNotification) {
         interestNotifications.add(interestNotification);
+    }
+
+    public void addViewer(User user) {
+        viewers.add(user);
+    }
+
+    public void addRecommendation(Recommendation recommendation) {
+        recommendations.add(recommendation);
     }
 }

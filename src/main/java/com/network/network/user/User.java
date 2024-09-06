@@ -12,6 +12,7 @@ import com.network.network.notification.modules.CommentNotification;
 import com.network.network.notification.modules.InterestNotification;
 import com.network.network.notification.modules.LikeNotification;
 import com.network.network.post.Post;
+import com.network.network.recommendation.Recommendation;
 import com.network.network.role.Role;
 import com.network.network.security.jwt.JwtToken;
 import com.network.network.user.info.Info;
@@ -20,14 +21,12 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 import java.util.*;
 
 @Entity
 @Getter @Setter
 @NoArgsConstructor
-@ToString
 public class User {
     @Id
     @JsonView(View.AsProfessional.class)
@@ -84,7 +83,7 @@ public class User {
     private Set<Post> liked = new HashSet<>();
 
     @JsonView(View.AsAdmin.class)
-    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
     @JsonIgnoreProperties("user")
     private List<Comment> comments = new ArrayList<>();
 
@@ -132,6 +131,14 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     List<JwtToken> jwtTokens = new ArrayList<>();
 
+    @JsonIgnore
+    @ManyToMany(mappedBy = "viewers")
+    Set<Post> viewed = new HashSet<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
+    private List<Recommendation> recommendations = new ArrayList<>();
+
     public User(RegisterRequest registerRequest) {
         this.firstName = registerRequest.getFirstName();
         this.lastName = registerRequest.getLastName();
@@ -166,6 +173,8 @@ public class User {
         this.receivedCommentNotifications = new ArrayList<>(user.getReceivedCommentNotifications());
         this.sentInterestNotifications = new ArrayList<>(user.getSentInterestNotifications());
         this.receivedInterestNotifications = new ArrayList<>(user.getReceivedInterestNotifications());
+        this.viewed = new HashSet<>(user.getViewed());
+        this.recommendations = new ArrayList<>(user.getRecommendations());
     }
 
     public void addToken(JwtToken jwtToken) {
@@ -230,5 +239,13 @@ public class User {
 
     public void addReceivedInterestNotification(InterestNotification notification) {
         receivedInterestNotifications.add(notification);
+    }
+
+    public void addViewedPost(Post post) {
+        viewed.add(post);
+    }
+
+    public void addRecommendation(Recommendation recommendation) {
+        recommendations.add(recommendation);
     }
 }

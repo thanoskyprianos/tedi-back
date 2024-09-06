@@ -19,7 +19,6 @@ import com.network.network.user.resource.UserResourceAssembler;
 import com.network.network.user.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.websocket.server.PathParam;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.HttpStatus;
@@ -71,6 +70,7 @@ public class PostController {
     public ResponseEntity<?> getPostsForUser(@PathVariable int userId, @PathParam("page") int page) throws IllegalArgumentException {
         User user = userService.getUserById(userId);
 
+
         return ResponseEntity.ok(postResourceAssembler.toCollectionModel(postService.getAllPostsFor(user, page)));
     }
 
@@ -102,6 +102,22 @@ public class PostController {
 
         Post post = helperService.getPostByPair(userId, postId);
         return ResponseEntity.ok(postResourceAssembler.toModel(post));
+    }
+
+    @PutMapping("/{postId}/view")
+    @JsonView(View.AsProfessional.class)
+    @PreAuthorize("#userId == principal.getId()")
+    public ResponseEntity<?> viewPost(@PathVariable int userId, @PathVariable int postId) {
+        User user = userService.getUserById(userId);
+        Post post = postService.getPost(postId);
+
+        user.addViewedPost(post);
+        post.addViewer(user);
+
+        userService.updateUser(user);
+        postService.savePost(post);
+
+        return ResponseEntity.noContent().build();
     }
 
 
@@ -187,10 +203,6 @@ public class PostController {
             @PathVariable int userId,
             @PathVariable int postId
     ) {
-        if (helperService.notAccessible(userId)) {
-            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
-        }
-
         User user = userService.getPrincipal();
         Post post = helperService.getPostByPair(userId, postId);
 
@@ -248,10 +260,6 @@ public class PostController {
             @PathVariable int postId,
             @RequestBody Comment comment
     ) {
-        if (helperService.notAccessible(userId)) {
-            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
-        }
-
         User user = userService.getPrincipal();
         Post post = helperService.getPostByPair(userId, postId);
 
