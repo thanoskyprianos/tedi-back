@@ -52,7 +52,7 @@ public class PostService {
         if (recPosts.isEmpty()) {
             List<Post> connPosts =
                     new ArrayList<>(postRepository.findAll().stream().filter(post ->
-                        post.isPost() && post.getUser() != user && (
+                        post.isPost() && (post.getUser() == user ||
                                 post.getUser().isConnected(user) ||
                                 user.getConnected().stream().anyMatch(connection ->
                                         connection.isConnected(post.getUser()))))
@@ -62,7 +62,7 @@ public class PostService {
             // get maxPage latest posts (used for new users)
             if (connPosts.isEmpty()) {
                 if (page == 1) {
-                    List<Post> posts = getAllPosts();
+                    List<Post> posts = getAllPosts().stream().sorted(Comparator.comparing(Post::getCreated).reversed()).toList();
                     return posts.subList(0, Math.min(pageSize, posts.size()));
                 } else {
                     throw new IllegalArgumentException("Should follow users or wait for recommendations");
