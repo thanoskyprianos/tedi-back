@@ -46,22 +46,6 @@ public class NetWorkApplication {
     @Value("${admin.password}")
     private String adminPassword;
 
-    @Resource
-    private ObjectMapper objectMapper;
-
-
-    @Value("${config.add.mock_users}")
-    private boolean shouldAddMockUsers;
-    @Value("classpath:mock_users.json")
-    private File mockUsers;
-
-    @Value("${config.add.mock_posts}")
-    private boolean shouldAddMockPosts;
-    @Value("classpath:mock_posts.json")
-    private File mockPosts;
-    @Value("classpath:mock_jobOffers.json")
-    private File mockJobOffers;
-
     public static void main(String[] args) {
         SpringApplication.run(NetWorkApplication.class, args);
     }
@@ -89,62 +73,6 @@ public class NetWorkApplication {
             admin.setPassword(adminPassword);
 
             userService.saveAdmin(admin);
-        }
-
-        if (shouldAddMockUsers) {
-            System.out.println(ANSI_RED + "ADDING MOCK USERS" + ANSI_RESET);
-            addMockUsers();
-        }
-
-        if (shouldAddMockPosts) {
-            System.out.println(ANSI_RED + "ADDING MOCK POSTS" + ANSI_RESET);
-            addMockPosts();
-            System.out.println(ANSI_RED + "ADDING MOCK POSTS" + ANSI_RESET);
-            addMockJobOffers();
-        }
-    }
-
-    @Transactional
-    public void addMockUsers() {
-        try {
-            Arrays.stream(objectMapper.readValue(mockUsers, User[].class)).toList().forEach(user -> {
-                System.out.println(ANSI_RED + "ADDING USER: " + ANSI_RESET + user);
-                userService.saveUser(user);
-            });
-        } catch (Exception e) {
-            System.out.println(ANSI_RED + "ERROR WHILE SAVING USER: " + ANSI_RESET + e.getMessage());
-        }
-    }
-
-    @Transactional
-    public void addMockPosts() {
-        List<User> users = userService.getAllUsers();
-
-        try {
-            Arrays.stream(objectMapper.readValue(mockPosts, Post[].class)).toList().forEach(post -> {
-                post.setUser(users.get((int) (Math.random() * users.size())));
-
-                System.out.println(ANSI_RED + "ADDING POST: " + ANSI_RESET + post);
-                postService.savePost(post);
-            });
-        } catch (Exception e) {
-            System.out.println(ANSI_RED + "ERROR WHILE SAVING POST: " + ANSI_RESET + e.getMessage());
-        }
-    }
-
-    @Transactional
-    public void addMockJobOffers() {
-        List<User> users = userService.getAllUsers();
-
-        try {
-            Arrays.stream(objectMapper.readValue(mockJobOffers, Post[].class)).toList().forEach(jobOffer -> {
-                jobOffer.setUser(users.get((int) (Math.random() * users.size())));
-
-                System.out.println(ANSI_RED + "ADDING JOB OFFER: " + ANSI_RESET + jobOffer);
-                postService.savePost(jobOffer);
-            });
-        } catch (Exception e) {
-            System.out.println(ANSI_RED + "ERROR WHILE SAVING JOB OFFER: " + ANSI_RESET + e.getMessage());
         }
     }
 
